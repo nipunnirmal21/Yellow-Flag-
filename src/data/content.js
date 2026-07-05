@@ -13,6 +13,8 @@ export const navItems = [
   { id: 'stats', label: 'Stats' },
   { id: 'schedule', label: 'Schedule' },
   { id: 'tracks', label: 'Tracks' },
+  { id: 'teams', label: 'Teams' },
+  { id: 'standing', label: 'Standing' },
   { id: 'highlights', label: 'Highlights' },
   { id: 'gallery', label: 'Gallery' },
   { id: 'fan-zone', label: 'Fan Zone' },
