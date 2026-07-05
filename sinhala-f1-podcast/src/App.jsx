@@ -11,6 +11,7 @@ import Journey from './components/Journey';
 import Navbar from './components/Navbar';
 import Schedule from './components/Schedule';
 import Stats from './components/Stats';
+import Teams from './components/Teams';
 import Tracks from './components/Tracks';
 import BackgroundEffects from './components/ui/BackgroundEffects';
 import { navItems } from './data/content';
@@ -55,6 +56,7 @@ export default function App() {
         <Stats />
         <Schedule />
         <Tracks />
+        <Teams />
         <Highlights />
         <Gallery />
         <FanZone />
