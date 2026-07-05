@@ -1,7 +1,8 @@
 /**
- * F1 Teams — edit names, standings, points, descriptions, colors, and images here.
+ * F1 Teams — edit names, standings, points, descriptions, colors, images, and drivers here.
  * image: filename key in src/assets/teams/ (e.g. 'mclaren' → mclaren.jpg)
  * status: 'champion' | 'active' | 'new'
+ * driver image: filename key in src/assets/drivers/ (e.g. 'lando-norris' → lando-norris.png)
  */
 export const teamsIntro =
   '2025 Constructors’ Championship order — plus Cadillac joining the grid as a new 2026 entry.';
@@ -19,6 +20,14 @@ export const f1Teams = [
     description: 'Papaya pace and relentless development delivered the 2025 title fight.',
     color: '#FF8000',
     image: 'mclaren',
+    drivers: [
+      { name: 'Lando Norris', role: 'Main Driver', image: 'lando-norris', nationality: 'GBR' },
+      { name: 'Oscar Piastri', role: 'Main Driver', image: 'oscar-piastri', nationality: 'AUS' },
+    ],
+    reserveDrivers: [
+      { name: 'Leonardo Fornaroli', role: 'Reserve Driver', image: 'leonardo-fornaroli', nationality: 'ITA' },
+      { name: "Pato O'Ward", role: 'Reserve Driver', image: 'pato-oward', nationality: 'MEX' },
+    ],
   },
   {
     slug: 'mercedes',
@@ -32,6 +41,13 @@ export const f1Teams = [
     description: 'Strong race pace and consistency kept them in the championship hunt.',
     color: '#27F4D2',
     image: 'mercedes',
+    drivers: [
+      { name: 'George Russell', role: 'Main Driver', image: 'george-russell', nationality: 'GBR' },
+      { name: 'Kimi Antonelli', role: 'Main Driver', image: 'kimi-antonelli', nationality: 'ITA' },
+    ],
+    reserveDrivers: [
+      { name: 'Fred Vesti', role: 'Reserve Driver', image: 'fred-vesti', nationality: 'DNK' },
+    ],
   },
   {
     slug: 'red-bull',
@@ -45,6 +61,13 @@ export const f1Teams = [
     description: 'Still a podium threat with sharp strategy and outright single-lap speed.',
     color: '#1E41FF',
     image: 'red-bull',
+    drivers: [
+      { name: 'Max Verstappen', role: 'Main Driver', image: 'max-verstappen', nationality: 'NED' },
+      { name: 'Isack Hadjar', role: 'Main Driver', image: 'isack-hadjar', nationality: 'FRA' },
+    ],
+    reserveDrivers: [
+      { name: 'Yuki Tsunoda', role: 'Reserve Driver', image: 'yuki-tsunoda', nationality: 'JPN' },
+    ],
   },
   {
     slug: 'ferrari',
@@ -58,6 +81,13 @@ export const f1Teams = [
     description: 'Passion, pressure, and pure Italian racing ambition every race weekend.',
     color: '#DC0000',
     image: 'ferrari',
+    drivers: [
+      { name: 'Charles Leclerc', role: 'Main Driver', image: 'charles-leclerc', nationality: 'MON' },
+      { name: 'Lewis Hamilton', role: 'Main Driver', image: 'lewis-hamilton', nationality: 'GBR' },
+    ],
+    reserveDrivers: [
+      { name: 'Antonio Giovinazzi', role: 'Reserve Driver', image: 'antonio-giovinazzi', nationality: 'ITA' },
+    ],
   },
   {
     slug: 'williams',
@@ -71,6 +101,13 @@ export const f1Teams = [
     description: 'A revived midfield powerhouse with bold overtakes and growing confidence.',
     color: '#005AFF',
     image: 'williams',
+    drivers: [
+      { name: 'Carlos Sainz', role: 'Main Driver', image: 'carlos-sainz', nationality: 'ESP' },
+      { name: 'Alexander Albon', role: 'Main Driver', image: 'alexander-albon', nationality: 'THA' },
+    ],
+    reserveDrivers: [
+      { name: 'Luke Browning', role: 'Reserve Driver', image: 'luke-browning', nationality: 'GBR' },
+    ],
   },
   {
     slug: 'racing-bulls',
@@ -84,6 +121,14 @@ export const f1Teams = [
     description: 'Aggressive race craft and smart calls from the sister Red Bull squad.',
     color: '#6692FF',
     image: 'racing-bulls',
+    drivers: [
+      { name: 'Liam Lawson', role: 'Main Driver', image: 'liam-lawson', nationality: 'NZL' },
+      { name: 'Arvid Lindblad', role: 'Main Driver', image: 'arvid-lindblad', nationality: 'GBR' },
+    ],
+    reserveDrivers: [
+      { name: 'Yuki Tsunoda', role: 'Reserve Driver', image: 'yuki-tsunoda', nationality: 'JPN' },
+      { name: 'Ayumu Iwasa', role: 'Reserve Driver', image: 'ayumu-iwasa', nationality: 'JPN' },
+    ],
   },
   {
     slug: 'aston-martin',
@@ -97,6 +142,14 @@ export const f1Teams = [
     description: 'Building long-term performance with green ambition and factory growth.',
     color: '#006F62',
     image: 'aston-martin',
+    drivers: [
+      { name: 'Fernando Alonso', role: 'Main Driver', image: 'fernando-alonso', nationality: 'ESP' },
+      { name: 'Lance Stroll', role: 'Main Driver', image: 'lance-stroll', nationality: 'CAN' },
+    ],
+    reserveDrivers: [
+      { name: 'Jak Crawford', role: 'Reserve Driver', image: 'jak-crawford', nationality: 'USA' },
+      { name: 'Stoffel Vandoorne', role: 'Reserve Driver', image: 'stoffel-vandoorne', nationality: 'BEL' },
+    ],
   },
   {
     slug: 'haas',
@@ -110,11 +163,19 @@ export const f1Teams = [
     description: 'Hard-charging American outfit fighting for every midfield point.',
     color: '#B6BABD',
     image: 'haas',
+    drivers: [
+      { name: 'Esteban Ocon', role: 'Main Driver', image: 'esteban-ocon', nationality: 'FRA' },
+      { name: 'Oliver Bearman', role: 'Main Driver', image: 'oliver-bearman', nationality: 'GBR' },
+    ],
+    reserveDrivers: [
+      { name: 'Jack Doohan', role: 'Reserve Driver', image: 'jack-doohan', nationality: 'AUS' },
+      { name: 'Ryo Hirakawa', role: 'Reserve Driver', image: 'ryo-hirakawa', nationality: 'JPN' },
+    ],
   },
   {
     slug: 'kick-sauber',
     position: 9,
-    name: 'Kick Sauber',
+    name: 'Audi / Kick Sauber',
     standing: 'P9',
     points: 49,
     pointsLabel: '49 pts',
@@ -123,6 +184,12 @@ export const f1Teams = [
     description: 'Neon flair and surprise pace when the weekend comes together.',
     color: '#52E252',
     image: 'kick-sauber',
+    drivers: [
+      { name: 'Nico Hulkenberg', role: 'Main Driver', image: 'nico-hulkenberg', nationality: 'GER' },
+      { name: 'Gabriel Bortoleto', role: 'Main Driver', image: 'gabriel-bortoleto', nationality: 'BRA' },
+    ],
+    reserveDrivers: [],
+    reserveTbc: true,
   },
   {
     slug: 'alpine',
@@ -136,6 +203,14 @@ export const f1Teams = [
     description: 'French factory team resetting for stronger seasons ahead.',
     color: '#0093CC',
     image: 'alpine',
+    drivers: [
+      { name: 'Pierre Gasly', role: 'Main Driver', image: 'pierre-gasly', nationality: 'FRA' },
+      { name: 'Franco Colapinto', role: 'Main Driver', image: 'franco-colapinto', nationality: 'ARG' },
+    ],
+    reserveDrivers: [
+      { name: 'Paul Aron', role: 'Reserve Driver', image: 'paul-aron', nationality: 'EST' },
+      { name: 'Kush Maini', role: 'Reserve Driver', image: 'kush-maini', nationality: 'IND' },
+    ],
   },
   {
     slug: 'cadillac',
@@ -149,5 +224,12 @@ export const f1Teams = [
     description: 'American luxury meets Formula 1 — a fresh name joining the grid in 2026.',
     color: '#C4A052',
     image: 'cadillac',
+    drivers: [
+      { name: 'Sergio Perez', role: 'Main Driver', image: 'sergio-perez', nationality: 'MEX' },
+      { name: 'Valtteri Bottas', role: 'Main Driver', image: 'valtteri-bottas', nationality: 'FIN' },
+    ],
+    reserveDrivers: [
+      { name: 'Zhou Guanyu', role: 'Reserve Driver', image: 'zhou-guanyu', nationality: 'CHN' },
+    ],
   },
 ];
