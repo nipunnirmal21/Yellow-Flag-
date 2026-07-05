@@ -10,6 +10,7 @@ import Highlights from './components/Highlights';
 import Journey from './components/Journey';
 import Navbar from './components/Navbar';
 import Schedule from './components/Schedule';
+import Standing from './components/Standing';
 import Stats from './components/Stats';
 import Teams from './components/Teams';
 import Tracks from './components/Tracks';
@@ -57,6 +58,7 @@ export default function App() {
         <Schedule />
         <Tracks />
         <Teams />
+        <Standing />
         <Highlights />
         <Gallery />
         <FanZone />
