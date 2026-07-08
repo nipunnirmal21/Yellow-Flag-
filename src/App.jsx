@@ -4,7 +4,6 @@ import About from './components/About';
 import Contact from './components/Contact';
 import FanZone from './components/FanZone';
 import Footer from './components/Footer';
-import Gallery from './components/Gallery';
 import Hero from './components/Hero';
 import Highlights from './components/Highlights';
 import Journey from './components/Journey';
@@ -60,7 +59,6 @@ export default function App() {
         <Teams />
         <Standing />
         <Highlights />
-        <Gallery />
         <FanZone />
         <Contact />
       </main>

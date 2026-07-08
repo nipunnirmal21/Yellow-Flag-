@@ -16,8 +16,6 @@ export const navItems = [
   { id: 'teams', label: 'Teams' },
   { id: 'standing', label: 'Standing' },
   { id: 'highlights', label: 'Highlights' },
-  { id: 'gallery', label: 'Gallery' },
-  { id: 'fan-zone', label: 'Fan Zone' },
   { id: 'contact', label: 'Contact' },
 ];
 
@@ -66,15 +64,6 @@ export const highlightCards = [
   { title: 'Driver Battle Discussions', text: 'Teammate wars, rivalries, and on-track drama explained clearly.', accent: 'from-white/15 to-yellow-400/10' },
   { title: 'Grand Prix Predictions', text: 'Bold previews, circuit analysis, and prediction episodes before lights out.', accent: 'from-yellow-400/25 to-transparent' },
   { title: 'Funny Podcast Moments', text: 'Entertaining banter, fan energy, and memorable podcast clips.', accent: 'from-zinc-500/20 to-yellow-500/10' },
-];
-
-export const galleryItems = [
-  { title: 'Race Weekend Thumbnail', subtitle: 'Podcast Visual', wide: true },
-  { title: 'Driver Focus', subtitle: 'F1 Inspired', wide: false },
-  { title: 'Paddock Vibes', subtitle: 'Behind the Scenes', wide: false },
-  { title: 'Grand Prix Review', subtitle: 'Episode Art', wide: false },
-  { title: 'Community Moment', subtitle: 'Fan Zone', wide: true },
-  { title: 'Strategy Breakdown', subtitle: 'Analysis Visual', wide: false },
 ];
 
 export const socialLinks = [
