@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import About from './components/About';
 import Contact from './components/Contact';
+import F1AssistantWidget from './components/F1AssistantWidget';
 import FanZone from './components/FanZone';
 import Footer from './components/Footer';
 import Hero from './components/Hero';
@@ -10,7 +11,6 @@ import Journey from './components/Journey';
 import Navbar from './components/Navbar';
 import Schedule from './components/Schedule';
 import Standing from './components/Standing';
-import Stats from './components/Stats';
 import Teams from './components/Teams';
 import Tracks from './components/Tracks';
 import BackgroundEffects from './components/ui/BackgroundEffects';
@@ -53,7 +53,6 @@ export default function App() {
         <Hero />
         <About />
         <Journey />
-        <Stats />
         <Schedule />
         <Tracks />
         <Teams />
@@ -64,6 +63,7 @@ export default function App() {
       </main>
 
       <Footer />
+      <F1AssistantWidget />
     </motion.div>
   );
 }

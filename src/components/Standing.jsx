@@ -1,133 +1,102 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  constructorStandings,
-  driverStandings,
-  lastUpdated,
-  standingsIntro,
-} from '../data/standings';
+import { standingsIntro } from '../data/standings';
 import Reveal from './ui/Reveal';
 import SectionHeading from './ui/SectionHeading';
 
-const driverImages = import.meta.glob('../assets/drivers/*.{png,jpg,jpeg,webp}', {
-  eager: true,
-  import: 'default',
-});
+const DRIVER_STANDINGS_URL = 'https://api.jolpi.ca/ergast/f1/current/driverStandings.json';
+const CONSTRUCTOR_STANDINGS_URL = 'https://api.jolpi.ca/ergast/f1/current/constructorStandings.json';
 
-const teamImages = import.meta.glob('../assets/teams/*.{png,jpg,jpeg,webp,svg}', {
-  eager: true,
-  import: 'default',
-});
+const TEAM_COLORS = {
+  red_bull: '#3671C6',
+  ferrari: '#E80020',
+  mclaren: '#FF8000',
+  mercedes: '#27F4D2',
+  alpine: '#0093CC',
+  rb: '#6692FF',
+  racing_bulls: '#6692FF',
+  haas: '#B6BABD',
+  williams: '#005AFF',
+  audi: '#52E252',
+  sauber: '#52E252',
+  kick_sauber: '#52E252',
+  aston_martin: '#006F62',
+  cadillac: '#C4A052',
+};
 
-function getDriverImage(slug) {
-  if (!slug) return null;
-  const match = Object.entries(driverImages).find(([path]) => path.includes(`/${slug}.`));
-  return match ? match[1] : null;
+function getTeamColor(constructorId) {
+  return TEAM_COLORS[constructorId] ?? '#FACC15';
 }
 
-function getTeamImage(slug) {
-  if (!slug) return null;
-  const match = Object.entries(teamImages).find(([path]) => path.includes(`/${slug}.`));
-  return match ? match[1] : null;
+function getSurname(fullName) {
+  return fullName.split(' ').pop()?.toUpperCase() ?? fullName.toUpperCase();
 }
 
-function getPodiumStyle(position) {
-  if (position === 1) {
-    return {
-      row: 'border-yellow-400/45 bg-yellow-400/[0.06] shadow-[0_0_40px_rgba(250,204,21,0.2)]',
-      badge: 'Leader',
-      posClass: 'text-yellow-300 shadow-[0_0_20px_rgba(250,204,21,0.4)]',
-    };
-  }
-  if (position === 2) {
-    return {
-      row: 'border-white/20 bg-white/[0.04] shadow-[0_0_24px_rgba(255,255,255,0.06)]',
-      badge: 'P2',
-      posClass: 'text-zinc-200',
-    };
-  }
-  if (position === 3) {
-    return {
-      row: 'border-orange-400/25 bg-orange-400/[0.04] shadow-[0_0_20px_rgba(251,146,60,0.1)]',
-      badge: 'P3',
-      posClass: 'text-orange-300',
-    };
-  }
-  return { row: 'border-white/10 bg-white/[0.02]', badge: null, posClass: 'text-zinc-400' };
-}
-
-function DriverAvatar({ slug, name, teamColor, size = 'md' }) {
-  const imageSrc = getDriverImage(slug);
-  const sizeClass = size === 'sm' ? 'h-10 w-10 text-xs' : 'h-12 w-12 text-sm';
-  const initials = name
+function AvatarPlaceholder({ label }) {
+  const initials = label
     .split(' ')
-    .map((w) => w[0])
+    .map((word) => word[0])
     .join('')
     .slice(0, 2)
     .toUpperCase();
 
-  if (imageSrc) {
-    return (
-      <img
-        src={imageSrc}
-        alt={name}
-        className={`${sizeClass} shrink-0 rounded-xl object-cover ring-2 ring-white/10`}
-      />
-    );
-  }
-
   return (
-    <div
-      className={`${sizeClass} flex shrink-0 items-center justify-center rounded-xl border bg-black/40 font-display font-black text-white`}
-      style={{ borderColor: `${teamColor}44` }}
-      title="Driver Image Coming Soon"
-    >
+    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-white/30 bg-black/20 font-display text-xs font-black text-white">
       {initials}
     </div>
   );
 }
 
-function TeamLogo({ slug, name, teamColor }) {
-  const imageSrc = getTeamImage(slug);
-  const initials = name
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-
-  if (imageSrc) {
-    return (
-      <img
-        src={imageSrc}
-        alt={name}
-        className="h-12 w-12 shrink-0 rounded-xl object-contain bg-black/30 p-1.5 ring-2 ring-white/10"
-      />
-    );
-  }
-
+function StartingGridCard({ position, name, points, teamColorCode, subtitle, index }) {
   return (
-    <div
-      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border bg-black/40 font-display text-sm font-black text-white"
-      style={{ borderColor: `${teamColor}44` }}
-      title="Team Image Coming Soon"
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: index * 0.025, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.02 }}
+      className="flex flex-row items-stretch overflow-hidden shadow-lg"
     >
-      {initials}
-    </div>
+      <div className="flex w-14 shrink-0 items-center justify-center rounded-l-2xl bg-white md:w-16">
+        <span className="font-display text-2xl font-black text-black md:text-3xl">{position}</span>
+      </div>
+
+      <div
+        className="flex min-w-0 flex-1 items-center gap-3 rounded-r-2xl px-3 py-2.5 md:gap-4 md:px-4 md:py-3"
+        style={{ backgroundColor: teamColorCode }}
+      >
+        <AvatarPlaceholder label={name} />
+
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-display text-base font-black uppercase tracking-wide text-white md:text-lg">
+            {getSurname(name)}
+          </p>
+          {subtitle && (
+            <p className="truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-white/75 md:text-xs">
+              {subtitle}
+            </p>
+          )}
+        </div>
+
+        <div className="shrink-0 text-right">
+          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/70">Pts</p>
+          <p className="font-display text-xl font-black text-white md:text-2xl">{points}</p>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
-function TabButton({ active, children, onClick }) {
+function ViewModeButton({ active, children, onClick }) {
   return (
     <motion.button
       type="button"
       onClick={onClick}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className={`rounded-full px-6 py-3.5 text-xs font-black uppercase tracking-[0.18em] transition md:px-8 md:text-sm ${
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      className={`rounded-full px-7 py-4 text-xs font-black uppercase tracking-[0.2em] transition md:px-10 md:text-sm ${
         active
-          ? 'bg-yellow-400 text-black shadow-[0_0_32px_rgba(250,204,21,0.4)]'
-          : 'border border-white/15 bg-white/5 text-zinc-200 hover:border-yellow-400/30 hover:text-yellow-200'
+          ? 'bg-yellow-400 text-black shadow-[0_0_40px_rgba(250,204,21,0.45)]'
+          : 'border-2 border-white/20 bg-white/10 text-white hover:border-yellow-400/50 hover:bg-white/15'
       }`}
     >
       {children}
@@ -135,158 +104,175 @@ function TabButton({ active, children, onClick }) {
   );
 }
 
-function DriverStandingRow({ driver, index }) {
-  const podium = getPodiumStyle(driver.position);
+function StandingsSkeleton() {
+  return (
+    <div className="flex flex-col items-center gap-10 py-6" role="status" aria-live="polite">
+      <div className="flex flex-col items-center gap-4">
+        <motion.div
+          className="h-12 w-12 rounded-full border-2 border-yellow-400/20 border-t-yellow-400"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
+        />
+        <p className="text-xs font-bold uppercase tracking-[0.28em] text-zinc-400">Loading live standings</p>
+      </div>
 
+      <div className="grid w-full grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+        {Array.from({ length: 8 }, (_, index) => {
+          const isEvenPosition = (index + 1) % 2 === 0;
+          return (
+            <div key={index} className={isEvenPosition ? 'md:mt-10' : undefined}>
+              <div className="flex overflow-hidden">
+                <div className="h-[4.5rem] w-14 shrink-0 animate-pulse rounded-l-2xl bg-white/90 md:w-16" />
+                <div className="h-[4.5rem] flex-1 animate-pulse rounded-r-2xl bg-white/10" />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function StartingGridView({ items, mode, season }) {
   return (
     <motion.div
+      key={mode}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.03, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ scale: 1.01, y: -2 }}
-      className={`group relative overflow-hidden rounded-2xl border backdrop-blur-xl transition hover:border-yellow-400/30 hover:shadow-[0_0_28px_rgba(250,204,21,0.12)] ${podium.row}`}
-      style={{ borderLeftWidth: '4px', borderLeftColor: driver.teamColor }}
+      exit={{ opacity: 0, y: -16 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:gap-5 md:p-5">
-        <div className="flex items-center gap-4 sm:w-auto">
-          <span className={`font-display text-3xl font-black md:text-4xl ${podium.posClass}`}>
-            {String(driver.position).padStart(2, '0')}
-          </span>
-          <DriverAvatar slug={driver.driverImage} name={driver.driverName} teamColor={driver.teamColor} />
-        </div>
+      <div className="mb-8 text-center">
+        <h3 className="font-display text-3xl font-black uppercase italic leading-none tracking-tight text-white md:text-5xl">
+          <span className="text-white">Championship </span>
+          <span className="text-red-600">Grid</span>
+        </h3>
+        <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-zinc-400 md:text-sm">
+          {mode === 'drivers'
+            ? `${season || '2026'} Driver Standings`
+            : `${season || '2026'} Constructor Standings`}
+        </p>
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display text-lg font-black uppercase text-white md:text-xl">
-              {driver.driverName}
-            </h3>
-            {podium.badge && (
-              <span className="rounded-full border border-yellow-400/40 bg-yellow-400/15 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.16em] text-yellow-200">
-                {podium.badge}
-              </span>
-            )}
-          </div>
-          <p className="mt-1 text-sm font-semibold text-zinc-300">{driver.team}</p>
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">{driver.nationality}</p>
-        </div>
+      <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+        {items.map((item, index) => {
+          const isEvenPosition = item.position % 2 === 0;
 
-        <div className="flex items-center justify-between gap-6 sm:justify-end">
-          <div className="text-left sm:text-right">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Wins</p>
-            <p className="font-display text-xl font-bold text-white">{driver.wins}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Points</p>
-            <p className="font-display text-2xl font-black text-yellow-300 md:text-3xl">{driver.points}</p>
-          </div>
-        </div>
+          return (
+            <div
+              key={`${mode}-${item.position}-${item.name || item.team}`}
+              className={isEvenPosition ? 'md:mt-10' : undefined}
+            >
+              <StartingGridCard
+                position={item.position}
+                name={mode === 'drivers' ? item.name : item.team}
+                subtitle={mode === 'drivers' ? item.team : undefined}
+                points={item.points}
+                teamColorCode={item.teamColorCode}
+                index={index}
+              />
+            </div>
+          );
+        })}
       </div>
     </motion.div>
   );
 }
 
-function ConstructorStandingRow({ team, index }) {
-  const podium = getPodiumStyle(team.position);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.03, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ scale: 1.01, y: -2 }}
-      className={`group relative overflow-hidden rounded-2xl border backdrop-blur-xl transition hover:border-yellow-400/30 hover:shadow-[0_0_28px_rgba(250,204,21,0.12)] ${podium.row}`}
-      style={{ borderLeftWidth: '4px', borderLeftColor: team.teamColor }}
-    >
-      <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:gap-5 md:p-5">
-        <div className="flex items-center gap-4 sm:w-auto">
-          <span className={`font-display text-3xl font-black md:text-4xl ${podium.posClass}`}>
-            {String(team.position).padStart(2, '0')}
-          </span>
-          <TeamLogo slug={team.teamLogo} name={team.teamName} teamColor={team.teamColor} />
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display text-lg font-black uppercase text-white md:text-xl">{team.teamName}</h3>
-            {podium.badge && (
-              <span className="rounded-full border border-yellow-400/40 bg-yellow-400/15 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.16em] text-yellow-200">
-                {podium.badge}
-              </span>
-            )}
-          </div>
-          <p className="mt-2 text-sm text-zinc-300">{team.drivers.join(' · ')}</p>
-        </div>
-
-        <div className="flex items-center justify-between gap-6 sm:justify-end">
-          <div className="text-left sm:text-right">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Wins</p>
-            <p className="font-display text-xl font-bold text-white">{team.wins}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">Points</p>
-            <p className="font-display text-2xl font-black text-yellow-300 md:text-3xl">{team.points}</p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
+function mapDriverStandings(rawList) {
+  return (rawList ?? []).map((entry) => {
+    const constructor = entry.Constructors?.[0];
+    return {
+      position: Number(entry.position),
+      name: `${entry.Driver.givenName} ${entry.Driver.familyName}`,
+      team: constructor?.name ?? '',
+      points: entry.points,
+      teamColorCode: getTeamColor(constructor?.constructorId),
+    };
+  });
 }
 
-function DriverStandingsView() {
-  return (
-    <motion.div
-      key="drivers"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="space-y-3"
-    >
-      <div className="mb-4 hidden grid-cols-[auto_1fr_auto_auto] gap-4 px-5 text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500 md:grid">
-        <span>Pos</span>
-        <span>Driver</span>
-        <span className="text-right">Wins</span>
-        <span className="text-right">Points</span>
-      </div>
-      {driverStandings.map((driver, index) => (
-        <DriverStandingRow key={driver.driverName} driver={driver} index={index} />
-      ))}
-    </motion.div>
-  );
-}
-
-function ConstructorStandingsView() {
-  return (
-    <motion.div
-      key="constructors"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="space-y-3"
-    >
-      <div className="mb-4 hidden grid-cols-[auto_1fr_auto_auto] gap-4 px-5 text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500 md:grid">
-        <span>Pos</span>
-        <span>Team</span>
-        <span className="text-right">Wins</span>
-        <span className="text-right">Points</span>
-      </div>
-      {constructorStandings.map((team, index) => (
-        <ConstructorStandingRow key={team.teamName} team={team} index={index} />
-      ))}
-    </motion.div>
-  );
+function mapConstructorStandings(rawList) {
+  return (rawList ?? []).map((entry) => ({
+    position: Number(entry.position),
+    team: entry.Constructor.name,
+    points: entry.points,
+    teamColorCode: getTeamColor(entry.Constructor.constructorId),
+  }));
 }
 
 export default function Standing() {
-  const [activeTab, setActiveTab] = useState('drivers');
+  const [viewMode, setViewMode] = useState('drivers');
+  const [driverStandings, setDriverStandings] = useState([]);
+  const [constructorStandings, setConstructorStandings] = useState([]);
+  const [seasonMeta, setSeasonMeta] = useState({ season: '', round: '' });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function fetchStandings() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const [driversRes, constructorsRes] = await Promise.all([
+          fetch(DRIVER_STANDINGS_URL, { signal: controller.signal }),
+          fetch(CONSTRUCTOR_STANDINGS_URL, { signal: controller.signal }),
+        ]);
+
+        if (!driversRes.ok || !constructorsRes.ok) {
+          throw new Error('Failed to load championship standings.');
+        }
+
+        const [driversJson, constructorsJson] = await Promise.all([
+          driversRes.json(),
+          constructorsRes.json(),
+        ]);
+
+        const driverList = driversJson.MRData.StandingsTable.StandingsLists[0];
+        const constructorList = constructorsJson.MRData.StandingsTable.StandingsLists[0];
+
+        setDriverStandings(mapDriverStandings(driverList?.DriverStandings));
+        setConstructorStandings(mapConstructorStandings(constructorList?.ConstructorStandings));
+        setSeasonMeta({
+          season: driverList?.season || constructorList?.season || '',
+          round: driverList?.round || constructorList?.round || '',
+        });
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        setError(err.message || 'Unable to fetch live standings.');
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchStandings();
+    return () => controller.abort();
+  }, []);
+
+  const lastUpdated =
+    seasonMeta.season && seasonMeta.round
+      ? `Live from Ergast · Season ${seasonMeta.season} · Round ${seasonMeta.round}`
+      : 'Live championship data from Jolpi / Ergast';
 
   return (
     <section id="standing" className="relative py-24 md:py-32">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(250,204,21,0.06),transparent_40%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-1/3 h-px bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.08),transparent_35%),radial-gradient(circle_at_30%_20%,rgba(250,204,21,0.05),transparent_40%)]" />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            'linear-gradient(45deg, #fff 25%, transparent 25%, transparent 75%, #fff 75%), linear-gradient(45deg, #fff 25%, transparent 25%, transparent 75%, #fff 75%)',
+          backgroundSize: '24px 24px',
+          backgroundPosition: '0 0, 12px 12px',
+        }}
+      />
 
-      <div className="relative mx-auto max-w-7xl px-5 md:px-8">
+      <div className="relative mx-auto max-w-5xl px-5 md:px-8">
         <Reveal>
           <SectionHeading eyebrow="Championship" title="Standing" description={standingsIntro} />
           <p className="-mt-8 mb-10 text-center text-xs font-semibold uppercase tracking-[0.22em] text-yellow-300/80">
@@ -295,20 +281,44 @@ export default function Standing() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="mb-8 flex flex-wrap justify-center gap-3">
-            <TabButton active={activeTab === 'drivers'} onClick={() => setActiveTab('drivers')}>
-              Driver Standing
-            </TabButton>
-            <TabButton active={activeTab === 'constructors'} onClick={() => setActiveTab('constructors')}>
-              Constructors Championship
-            </TabButton>
+          <div className="mb-10 flex flex-wrap justify-center gap-4">
+            <ViewModeButton active={viewMode === 'drivers'} onClick={() => setViewMode('drivers')}>
+              Driver Standings
+            </ViewModeButton>
+            <ViewModeButton active={viewMode === 'constructors'} onClick={() => setViewMode('constructors')}>
+              Constructor Standings
+            </ViewModeButton>
           </div>
         </Reveal>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-4 backdrop-blur-xl md:p-6">
-          <AnimatePresence mode="wait">
-            {activeTab === 'drivers' ? <DriverStandingsView /> : <ConstructorStandingsView />}
-          </AnimatePresence>
+        <div className="rounded-[2rem] border border-white/10 bg-black/40 p-5 backdrop-blur-xl md:p-8">
+          {isLoading ? (
+            <StandingsSkeleton />
+          ) : error ? (
+            <div className="flex flex-col items-center gap-3 py-16 text-center">
+              <p className="font-display text-2xl font-black uppercase tracking-wide text-white">Signal Lost</p>
+              <p className="max-w-md text-sm text-zinc-400">{error}</p>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="mt-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-6 py-3 text-xs font-black uppercase tracking-[0.2em] text-yellow-300 transition hover:bg-yellow-400/20"
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              {viewMode === 'drivers' ? (
+                <StartingGridView items={driverStandings} mode="drivers" season={seasonMeta.season} />
+              ) : (
+                <StartingGridView
+                  items={constructorStandings}
+                  mode="constructors"
+                  season={seasonMeta.season}
+                />
+              )}
+            </AnimatePresence>
+          )}
         </div>
       </div>
     </section>

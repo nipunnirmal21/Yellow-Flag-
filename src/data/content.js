@@ -10,7 +10,6 @@ export const navItems = [
   { id: 'home', label: 'Home' },
   { id: 'about', label: 'About' },
   { id: 'journey', label: 'Journey' },
-  { id: 'stats', label: 'Stats' },
   { id: 'schedule', label: 'Schedule' },
   { id: 'tracks', label: 'Tracks' },
   { id: 'teams', label: 'Teams' },
@@ -48,15 +47,6 @@ export const timelineItems = [
   { year: '04', title: 'Race Review Series', text: 'Dedicated race review episodes become a fan-favorite format after every Grand Prix.' },
   { year: '05', title: 'Fan Discussions', text: 'Live-style discussions, Q&A energy, and community-driven F1 conversations expand.' },
   { year: '06', title: 'Future of Yellow Flag', text: 'Bigger episodes, stronger visuals, and deeper F1 coverage for every Sri Lankan fan.' },
-];
-
-export const stats = [
-  { label: 'Podcast Episodes', value: 50, suffix: '+', icon: 'mic' },
-  { label: 'Race Reviews', value: 24, suffix: '+', icon: 'flag' },
-  { label: 'F1 Topics Covered', value: 100, suffix: '+', icon: 'topics' },
-  { label: 'Community Members', value: 15, suffix: 'K+', icon: 'users' },
-  { label: 'YouTube Views', value: 250, suffix: 'K+', icon: 'youtube' },
-  { label: 'Seasons Discussed', value: 6, suffix: '', icon: 'season' },
 ];
 
 export const highlightCards = [
