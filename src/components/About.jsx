@@ -34,7 +34,11 @@ export default function About() {
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.28em] text-yellow-300">{host.role}</p>
                     <h3 className="mt-2 font-display text-3xl font-black uppercase text-white">{host.name}</h3>
-                    <p className="mt-4 text-base leading-7 text-zinc-300">{host.bio}</p>
+                    <div className="mt-4 space-y-3 text-base leading-7 text-zinc-300">
+                      {(Array.isArray(host.bio) ? host.bio : [host.bio]).map((paragraph, paragraphIndex) => (
+                        <p key={paragraphIndex}>{paragraph}</p>
+                      ))}
+                    </div>
 
                     <div className="mt-6 flex gap-3">
                       {host.socials.map((social) => (
