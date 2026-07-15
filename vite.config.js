@@ -4,4 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      // Yellow Flag assistant API (npm run server)
+      '/api': 'http://localhost:8787',
+    },
+  },
 });

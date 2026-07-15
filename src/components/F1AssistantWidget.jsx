@@ -1,6 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FaPaperPlane, FaRobot, FaXmark } from 'react-icons/fa6';
+import {
+  FaDownLeftAndUpRightToCenter,
+  FaPaperPlane,
+  FaRobot,
+  FaUpRightAndDownLeftFromCenter,
+  FaXmark,
+} from 'react-icons/fa6';
 
 const TOOLTIP_SEEN_KEY = 'f1_ai_tooltip_seen';
 const TOOLTIP_AUTO_HIDE_MS = 7000;
@@ -8,14 +14,25 @@ const TOOLTIP_AUTO_HIDE_MS = 7000;
 const WELCOME_MESSAGE = {
   id: 'welcome',
   role: 'bot',
-  text: "Welcome to the grid! I'm your F1 Assistant. Ask me anything about the 2026 season, drivers, or tracks.",
+  text: "Welcome to the grid! I'm the Yellow Flag F1 Assistant. Ask me about the 2026 season, standings, F1 history — or the Yellow Flag podcast itself.",
 };
+
+const ERROR_MESSAGE =
+  "Pit stop trouble — I couldn't reach the assistant. Check your connection and try again.";
 
 export default function F1AssistantWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
+  const [isTyping, setIsTyping] = useState(false);
+  const messageListRef = useRef(null);
+
+  useEffect(() => {
+    const list = messageListRef.current;
+    if (list) list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+  }, [messages, isTyping, isOpen]);
 
   useEffect(() => {
     const alreadySeen = sessionStorage.getItem(TOOLTIP_SEEN_KEY);
@@ -37,21 +54,47 @@ export default function F1AssistantWidget() {
     setIsOpen((prev) => !prev);
   }
 
-  function handleSend(event) {
+  function handleClose() {
+    setIsOpen(false);
+    setIsMaximized(false);
+  }
+
+  async function handleSend(event) {
     event.preventDefault();
     const trimmed = input.trim();
-    if (!trimmed) return;
+    if (!trimmed || isTyping) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { id: `user-${Date.now()}`, role: 'user', text: trimmed },
-      {
-        id: `bot-${Date.now()}`,
-        role: 'bot',
-        text: 'AI replies coming soon — this is a visual mockup for now.',
-      },
-    ]);
+    const userMessage = { id: `user-${Date.now()}`, role: 'user', text: trimmed };
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
     setInput('');
+    setIsTyping(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: nextMessages
+            .filter((message) => message.id !== 'welcome')
+            .map(({ role, text }) => ({ role, text })),
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      const reply =
+        response.ok && data.reply ? data.reply : data.message || ERROR_MESSAGE;
+      setMessages((prev) => [
+        ...prev,
+        { id: `bot-${Date.now()}`, role: 'bot', text: reply },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { id: `bot-${Date.now()}`, role: 'bot', text: ERROR_MESSAGE },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   }
 
   return (
@@ -64,7 +107,13 @@ export default function F1AssistantWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.96 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="flex h-[min(28rem,70vh)] w-[min(22rem,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-[1.75rem] border border-yellow-400/20 bg-[#0a0a0a]/95 shadow-[0_0_50px_rgba(250,204,21,0.12),0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-xl"
+            style={{
+              width: isMaximized
+                ? 'min(30rem, calc(100vw - 2.5rem))'
+                : 'min(22rem, calc(100vw - 2.5rem))',
+              height: isMaximized ? 'min(36rem, 85vh)' : 'min(28rem, 70vh)',
+            }}
+            className="flex flex-col overflow-hidden rounded-[1.75rem] border border-yellow-400/20 bg-[#0a0a0a]/95 shadow-[0_0_50px_rgba(250,204,21,0.12),0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-[width,height] duration-300 ease-out"
           >
             <header className="flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-black via-[#111] to-black px-4 py-3.5">
               <div className="flex items-center gap-3">
@@ -76,28 +125,43 @@ export default function F1AssistantWidget() {
                     F1 AI Assistant
                   </p>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                    Yellow Flag · Mock UI
+                    Yellow Flag · Ask about F1
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                aria-label="Close F1 assistant"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-300 transition hover:border-red-500/40 hover:bg-red-500/10 hover:text-white"
-              >
-                <FaXmark className="h-3.5 w-3.5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsMaximized((prev) => !prev)}
+                  aria-label={isMaximized ? 'Shrink F1 assistant' : 'Enlarge F1 assistant'}
+                  aria-pressed={isMaximized}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-300 transition hover:border-yellow-400/40 hover:bg-yellow-400/10 hover:text-yellow-300"
+                >
+                  {isMaximized ? (
+                    <FaDownLeftAndUpRightToCenter className="h-3 w-3" />
+                  ) : (
+                    <FaUpRightAndDownLeftFromCenter className="h-3 w-3" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  aria-label="Close F1 assistant"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-300 transition hover:border-red-500/40 hover:bg-red-500/10 hover:text-white"
+                >
+                  <FaXmark className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </header>
 
-            <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+            <div ref={messageListRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                    className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                       message.role === 'user'
                         ? 'rounded-br-md bg-yellow-400 text-black'
                         : 'rounded-bl-md border border-white/10 bg-white/[0.06] text-zinc-200'
@@ -107,6 +171,20 @@ export default function F1AssistantWidget() {
                   </div>
                 </div>
               ))}
+
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-white/10 bg-white/[0.06] px-3.5 py-3">
+                    {[0, 1, 2].map((dot) => (
+                      <span
+                        key={dot}
+                        className="h-1.5 w-1.5 animate-bounce rounded-full bg-yellow-400/80"
+                        style={{ animationDelay: `${dot * 0.15}s` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <form
@@ -126,7 +204,7 @@ export default function F1AssistantWidget() {
                   type="submit"
                   aria-label="Send message"
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={!input.trim()}
+                  disabled={!input.trim() || isTyping}
                 >
                   <FaPaperPlane className="h-3.5 w-3.5" />
                 </button>
