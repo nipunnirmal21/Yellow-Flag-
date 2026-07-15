@@ -24,9 +24,14 @@ export const aboutIntro =
 export const hosts = [
   {
     id: 1,
-    name: 'Host Name',
-    role: 'Race Analyst / Strategy Fan',
-    bio: 'Explains race tactics, team strategies, and championship battles in a simple Sinhala style.',
+    name: 'Lakindu',
+    role: 'Engineering Enthusiast / Red Bull Fan',
+    bio: [
+      "Lakindu's F1 origin story is painfully unglamorous: back in 2019, he stumbled onto a race on TV completely by accident — and by the time the checkered flag dropped, he was hooked for life. No dramatic paddock moment, no childhood memory of Schumacher. Just a remote control and questionable channel-surfing that changed everything.",
+      "That love only got more intense once he saw it in person — witnessing the Australian Grand Prix live left him properly fascinated by just how insanely fast these cars actually are. Onboard cameras don't even come close to doing it justice, apparently.",
+      "Based in Melbourne, Lakindu brings an engineering brain to the chaos of Formula 1 — when he's not buried in stats and lap-time deltas, he's nerding out over the actual engineering behind the cars (his studies are in engineering, so blame that for the technical tangents). But don't worry, he balances the nerdy stuff with a healthy dose of banter, hot takes on driver dramas, and the occasional unfiltered reaction to a first-lap pile-up.",
+      'A proud Red Bull Racing fan and self-appointed Max Verstappen defender-in-chief, Lakindu brings equal parts stats obsession, engineering curiosity, and cheeky commentary to every episode.',
+    ],
     badge: 'P1',
     socials: ['youtube', 'instagram'],
   },
