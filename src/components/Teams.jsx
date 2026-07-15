@@ -74,31 +74,26 @@ function TeamLogo({ team }) {
 
   if (!team.logoUrl || failed) {
     return (
-      <div className="flex h-28 w-full items-center justify-center md:h-32">
-        <span className="font-display text-4xl font-black tracking-[0.2em] text-white/20">{initials}</span>
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 md:h-16 md:w-16">
+        <span className="font-display text-xs font-black tracking-wider text-white/35 md:text-sm">{initials}</span>
       </div>
     );
   }
 
   return (
-    <div className="relative flex h-28 w-full items-center justify-center md:h-32">
-      <motion.img
-        src={team.logoUrl}
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-        referrerPolicy="no-referrer"
-        className="pointer-events-none max-h-20 w-[70%] object-contain opacity-90 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] md:max-h-24"
-        style={{
-          filter: shouldInvert
-            ? 'invert(1) brightness(1.05) drop-shadow(0 0 12px rgba(250,204,21,0.28)) drop-shadow(0 0 24px rgba(255,255,255,0.12))'
-            : 'drop-shadow(0 0 12px rgba(250,204,21,0.28)) drop-shadow(0 0 24px rgba(255,255,255,0.12))',
-        }}
-        whileHover={{ scale: 1.05, opacity: 1 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        onError={() => setFailed(true)}
-      />
-    </div>
+    <motion.img
+      src={team.logoUrl}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      referrerPolicy="no-referrer"
+      className={`pointer-events-none h-12 w-12 object-contain opacity-95 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)] md:h-16 md:w-16 ${
+        shouldInvert ? 'invert brightness-200' : ''
+      }`}
+      whileHover={{ scale: 1.06 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      onError={() => setFailed(true)}
+    />
   );
 }
 
@@ -214,17 +209,16 @@ function TeamCard({ team, index, isSelected, onViewTeam }) {
         <button
           type="button"
           onClick={() => onViewTeam(team.id)}
-          className="relative min-h-[220px] flex-1 overflow-hidden px-5 pb-5 pt-5 text-left md:min-h-[240px] md:px-6 md:pt-6"
+          className="relative flex-1 overflow-hidden px-5 pb-5 pt-5 text-left md:px-6 md:pt-6"
         >
-          <span className="relative z-10 inline-flex rounded-full border border-yellow-400/40 bg-black px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-yellow-300">
-            2026 Grid
-          </span>
-
-          <div className="relative z-10 mt-6">
+          <div className="relative z-10 flex items-start justify-between gap-4">
+            <span className="inline-flex rounded-full border border-yellow-400/40 bg-black px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-yellow-300">
+              2026 Grid
+            </span>
             <TeamLogo team={team} />
           </div>
 
-          <div className="relative z-10 mt-4 max-w-[95%]">
+          <div className="relative z-10 mt-8 max-w-[95%]">
             <h3 className="font-display text-xl font-extrabold uppercase leading-tight tracking-wide text-white md:text-2xl">
               {team.name}
             </h3>

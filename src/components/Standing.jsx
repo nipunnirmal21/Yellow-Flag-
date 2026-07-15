@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getDriverAvatar, getDriverInitials } from '../data/driverAvatars';
-import { standingsIntro } from '../data/standings';
+import { getConstructorMeta, standingsIntro } from '../data/standings';
 import Reveal from './ui/Reveal';
 import SectionHeading from './ui/SectionHeading';
 
@@ -62,6 +62,38 @@ function DriverAvatar({ name, size = 'md' }) {
   );
 }
 
+function ConstructorLogo({ logoUrl, invertLogo, name }) {
+  const [failed, setFailed] = useState(false);
+  const initials = (name ?? '')
+    .split(' ')
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  if (!logoUrl || failed) {
+    return (
+      <span className="mr-3 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 align-middle font-display text-[9px] font-black text-white/60 md:h-8 md:w-8">
+        {initials}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={logoUrl}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      referrerPolicy="no-referrer"
+      className={`mr-3 inline-block h-7 w-7 shrink-0 align-middle object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.1)] md:h-8 md:w-8 ${
+        invertLogo ? 'invert brightness-200' : ''
+      }`}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 function StartingGridCard({ position, name, points, teamColorCode, subtitle, index }) {
   return (
     <motion.div
@@ -96,6 +128,65 @@ function StartingGridCard({ position, name, points, teamColorCode, subtitle, ind
           <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/70">Pts</p>
           <p className="font-display text-xl font-black text-white md:text-2xl">{points}</p>
         </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function ConstructorStandingsTable({ items, season }) {
+  return (
+    <motion.div
+      key="constructors"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -16 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div className="mb-8 text-center">
+        <h3 className="font-display text-3xl font-black uppercase italic leading-none tracking-tight text-white md:text-5xl">
+          <span className="text-white">Championship </span>
+          <span className="text-red-600">Grid</span>
+        </h3>
+        <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-zinc-400 md:text-sm">
+          {`${season || '2026'} Constructor Standings`}
+        </p>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a]">
+        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500 md:px-6">
+          <span>Pos · Team</span>
+          <span>Pts</span>
+        </div>
+
+        <ul>
+          {items.map((item, index) => (
+            <motion.li
+              key={`constructor-${item.constructorId}-${item.position}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.03 }}
+              className="flex items-center justify-between border-b border-white/10 px-4 py-4 last:border-b-0 md:px-6 md:py-5"
+            >
+              <div className="flex min-w-0 items-center">
+                <span className="mr-3 w-7 shrink-0 font-display text-lg font-black text-white md:mr-4 md:w-8 md:text-xl">
+                  {item.position}
+                </span>
+                <ConstructorLogo
+                  logoUrl={item.logoUrl}
+                  invertLogo={item.invertLogo}
+                  name={item.team}
+                />
+                <p className="min-w-0 truncate font-display text-sm font-bold uppercase tracking-wide text-white md:text-base">
+                  {item.team}
+                </p>
+              </div>
+
+              <p className="shrink-0 pl-4 font-display text-xl font-black text-white md:text-2xl">
+                {item.points}
+              </p>
+            </motion.li>
+          ))}
+        </ul>
       </div>
     </motion.div>
   );
@@ -163,9 +254,7 @@ function StartingGridView({ items, mode, season }) {
           <span className="text-red-600">Grid</span>
         </h3>
         <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-zinc-400 md:text-sm">
-          {mode === 'drivers'
-            ? `${season || '2026'} Driver Standings`
-            : `${season || '2026'} Constructor Standings`}
+          {`${season || '2026'} Driver Standings`}
         </p>
       </div>
 
@@ -180,8 +269,8 @@ function StartingGridView({ items, mode, season }) {
             >
               <StartingGridCard
                 position={item.position}
-                name={mode === 'drivers' ? item.name : item.team}
-                subtitle={mode === 'drivers' ? item.team : undefined}
+                name={item.name}
+                subtitle={item.team}
                 points={item.points}
                 teamColorCode={item.teamColorCode}
                 index={index}
@@ -208,12 +297,19 @@ function mapDriverStandings(rawList) {
 }
 
 function mapConstructorStandings(rawList) {
-  return (rawList ?? []).map((entry) => ({
-    position: Number(entry.position),
-    team: entry.Constructor.name,
-    points: entry.points,
-    teamColorCode: getTeamColor(entry.Constructor.constructorId),
-  }));
+  return (rawList ?? []).map((entry) => {
+    const constructorId = entry.Constructor.constructorId;
+    const meta = getConstructorMeta(constructorId);
+    return {
+      position: Number(entry.position),
+      constructorId,
+      team: meta?.name ?? entry.Constructor.name,
+      points: entry.points,
+      teamColorCode: getTeamColor(constructorId),
+      logoUrl: meta?.logoUrl ?? null,
+      invertLogo: meta?.invertLogo ?? true,
+    };
+  });
 }
 
 export default function Standing() {
@@ -326,11 +422,7 @@ export default function Standing() {
               {viewMode === 'drivers' ? (
                 <StartingGridView items={driverStandings} mode="drivers" season={seasonMeta.season} />
               ) : (
-                <StartingGridView
-                  items={constructorStandings}
-                  mode="constructors"
-                  season={seasonMeta.season}
-                />
+                <ConstructorStandingsTable items={constructorStandings} season={seasonMeta.season} />
               )}
             </AnimatePresence>
           )}
