@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HiMenuAlt3, HiX } from 'react-icons/hi';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BRAND, navItems } from '../data/content';
 
 export default function Navbar({ activeSection }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -22,8 +25,31 @@ export default function Navbar({ activeSection }) {
 
   const handleNav = (id) => {
     setOpen(false);
+
+    if (location.pathname !== '/') {
+      navigate(id === 'home' ? '/' : { pathname: '/', hash: id });
+      return;
+    }
+
+    if (id === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const linkClass = (isActive) =>
+    `rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] transition ${
+      isActive
+        ? 'bg-yellow-400/15 text-yellow-300 shadow-[0_0_20px_rgba(250,204,21,0.15)]'
+        : 'text-zinc-300 hover:text-yellow-300'
+    }`;
+
+  const mobileLinkClass = (isActive) =>
+    `rounded-2xl px-4 py-3 text-left text-sm font-bold uppercase tracking-[0.18em] ${
+      isActive ? 'bg-yellow-400/15 text-yellow-300' : 'text-zinc-200'
+    }`;
 
   return (
     <header
@@ -49,20 +75,27 @@ export default function Navbar({ activeSection }) {
         </button>
 
         <nav className="hidden items-center gap-1 lg:flex">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => handleNav(item.id)}
-              className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] transition ${
-                activeSection === item.id
-                  ? 'bg-yellow-400/15 text-yellow-300 shadow-[0_0_20px_rgba(250,204,21,0.15)]'
-                  : 'text-zinc-300 hover:text-yellow-300'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+          {navItems.map((item) =>
+            item.path ? (
+              <Link
+                key={item.id}
+                to={item.path}
+                onClick={() => setOpen(false)}
+                className={linkClass(location.pathname === item.path || activeSection === item.id)}
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleNav(item.id)}
+                className={linkClass(location.pathname === '/' && activeSection === item.id)}
+              >
+                {item.label}
+              </button>
+            )
+          )}
         </nav>
 
         <button
@@ -84,18 +117,29 @@ export default function Navbar({ activeSection }) {
             className="border-t border-white/10 bg-black/95 px-5 py-6 backdrop-blur-xl lg:hidden"
           >
             <div className="flex flex-col gap-2">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleNav(item.id)}
-                  className={`rounded-2xl px-4 py-3 text-left text-sm font-bold uppercase tracking-[0.18em] ${
-                    activeSection === item.id ? 'bg-yellow-400/15 text-yellow-300' : 'text-zinc-200'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
+              {navItems.map((item) =>
+                item.path ? (
+                  <Link
+                    key={item.id}
+                    to={item.path}
+                    onClick={() => setOpen(false)}
+                    className={mobileLinkClass(
+                      location.pathname === item.path || activeSection === item.id
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleNav(item.id)}
+                    className={mobileLinkClass(location.pathname === '/' && activeSection === item.id)}
+                  >
+                    {item.label}
+                  </button>
+                )
+              )}
             </div>
           </motion.div>
         )}

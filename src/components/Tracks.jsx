@@ -1,101 +1,75 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaPlay } from 'react-icons/fa6';
-import abuDhabiImg from '../assets/tracks/abu-dhabi.svg';
-import australiaImg from '../assets/tracks/australia.svg';
-import chinaImg from '../assets/tracks/china.svg';
-import japanImg from '../assets/tracks/japan.svg';
-import monacoImg from '../assets/tracks/monaco.svg';
-import monzaImg from '../assets/tracks/monza.svg';
-import silverstoneImg from '../assets/tracks/silverstone.svg';
-import singaporeImg from '../assets/tracks/singapore.svg';
 import { f1Tracks2026, tracksIntro } from '../data/tracks';
 import ExpandableGrid from './ui/ExpandableGrid';
-import GlowButton from './ui/GlowButton';
 import Reveal from './ui/Reveal';
 import SectionHeading from './ui/SectionHeading';
 
-const trackImages = {
-  australia: australiaImg,
-  china: chinaImg,
-  japan: japanImg,
-  monaco: monacoImg,
-  silverstone: silverstoneImg,
-  monza: monzaImg,
-  singapore: singaporeImg,
-  'abu-dhabi': abuDhabiImg,
-};
+function TrackOutline({ track }) {
+  const [failed, setFailed] = useState(false);
+  const shouldInvert = Boolean(track.invertLayout);
 
-const trackImageById = {
-  1: 'australia',
-  2: 'china',
-  3: 'japan',
-  6: 'monaco',
-  9: 'silverstone',
-  13: 'monza',
-  16: 'singapore',
-  22: 'abu-dhabi',
-};
+  if (!track.layoutUrl || failed) {
+    return (
+      <div
+        className="pointer-events-none absolute -right-6 top-8 h-44 w-56 rounded-full bg-[radial-gradient(circle,rgba(250,204,21,0.08),transparent_70%)] opacity-60 md:h-52 md:w-64"
+        aria-hidden="true"
+      />
+    );
+  }
 
-function getTrackImage(trackId) {
-  const key = trackImageById[trackId];
-  return key ? trackImages[key] ?? null : null;
-}
-
-function TrackImagePlaceholder() {
   return (
-    <div className="flex h-full min-h-[200px] flex-col items-center justify-center bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.12),transparent_55%),linear-gradient(135deg,#181818,#050505)]">
-      <div className="mb-3 h-16 w-16 rounded-full border border-yellow-400/20 bg-yellow-400/5" />
-      <p className="text-xs font-bold uppercase tracking-[0.28em] text-yellow-300/80">Track Image</p>
-      <p className="mt-1 text-sm font-semibold text-zinc-400">Coming Soon</p>
-    </div>
+    <motion.img
+      src={track.layoutUrl}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      referrerPolicy="no-referrer"
+      className="pointer-events-none absolute -right-4 top-2 h-[70%] w-[72%] object-contain opacity-80 drop-shadow-[0_0_15px_rgba(255,255,255,0.15)] md:-right-2 md:top-4 md:h-[75%] md:w-[70%]"
+      style={{
+        filter: shouldInvert
+          ? 'invert(1) drop-shadow(0 0 12px rgba(250,204,21,0.35)) drop-shadow(0 0 28px rgba(250,204,21,0.18))'
+          : 'drop-shadow(0 0 12px rgba(250,204,21,0.35)) drop-shadow(0 0 28px rgba(250,204,21,0.18))',
+      }}
+      whileHover={{ scale: 1.04, opacity: 0.95 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      onError={() => setFailed(true)}
+    />
   );
 }
 
 function TrackCard({ track, index }) {
-  const imageSrc = getTrackImage(track.id);
-
   return (
     <Reveal delay={index * 0.04}>
       <motion.article
         id={`track-${track.id}`}
-        whileHover={{ y: -8 }}
-        className="group overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.03] backdrop-blur-xl transition hover:border-yellow-400/40 hover:shadow-[0_0_40px_rgba(250,204,21,0.18)]"
+        whileHover={{ y: -6 }}
+        className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0a0a0a] transition hover:border-yellow-400/30 hover:shadow-[0_0_36px_rgba(250,204,21,0.12)]"
       >
-        <div className="relative h-48 overflow-hidden md:h-52">
-          {imageSrc ? (
-            <>
-              <motion.img
-                src={imageSrc}
-                alt={`${track.name} circuit`}
-                className="h-full w-full object-cover"
-                whileHover={{ scale: 1.08 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/10" />
-            </>
-          ) : (
-            <TrackImagePlaceholder />
-          )}
+        <div className="relative min-h-[220px] flex-1 overflow-hidden px-5 pb-6 pt-5 md:min-h-[240px] md:px-6 md:pt-6">
+          <TrackOutline track={track} />
 
-          <div className="absolute left-4 top-4">
-            <span className="inline-flex rounded-full border border-yellow-400/25 bg-black/50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-yellow-200 backdrop-blur-sm">
-              Round {String(track.id).padStart(2, '0')}
-            </span>
-          </div>
+          <span className="relative z-10 inline-flex rounded-full border border-yellow-400/40 bg-black px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-yellow-300">
+            Round {String(track.id).padStart(2, '0')}
+          </span>
 
-          <div className="absolute inset-x-0 bottom-0 p-5">
-            <h3 className="font-display text-xl font-black uppercase leading-tight text-white md:text-2xl">
+          <div className="relative z-10 mt-10 max-w-[85%] md:mt-14 md:max-w-[70%]">
+            <h3 className="font-display text-xl font-extrabold uppercase leading-tight tracking-wide text-white md:text-2xl">
               {track.name}
             </h3>
-            <p className="mt-1 text-sm text-zinc-300">{track.country}</p>
+            <p className="mt-2 text-sm text-gray-400">{track.country}</p>
           </div>
         </div>
 
-        <div className="p-5">
-          <GlowButton href="#highlights" variant="secondary" className="w-full px-5 py-3 text-[11px]">
-            <FaPlay className="h-3.5 w-3.5" />
+        <div className="border-t border-white/5 bg-[#111111] p-4 md:p-5">
+          <a
+            href="#highlights"
+            className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-[#1a1a1a] px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition hover:border-yellow-400/35 hover:text-yellow-200"
+          >
+            <FaPlay className="h-3 w-3" />
             Podcast Preview
-          </GlowButton>
+          </a>
         </div>
       </motion.article>
     </Reveal>

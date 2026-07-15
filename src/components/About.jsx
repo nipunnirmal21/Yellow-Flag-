@@ -5,6 +5,7 @@ import { SocialIcon } from './ui/BackgroundEffects';
 import Reveal from './ui/Reveal';
 import SectionHeading from './ui/SectionHeading';
 
+
 function HostCard({ host }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const paragraphs = Array.isArray(host.bio) ? host.bio : [host.bio];

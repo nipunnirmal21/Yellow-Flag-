@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FaArrowRight, FaXmark } from 'react-icons/fa6';
+import { FaPlay, FaXmark } from 'react-icons/fa6';
 import { f1Teams2026, teamsIntro } from '../data/teams';
 import ExpandableGrid from './ui/ExpandableGrid';
-import GlowButton from './ui/GlowButton';
 import Reveal from './ui/Reveal';
 import SectionHeading from './ui/SectionHeading';
 
@@ -62,8 +61,10 @@ function getDriverImage(driverName) {
   return match ? match[1] : null;
 }
 
-function TeamImagePlaceholder({ name, color }) {
-  const initials = name
+function TeamLogo({ team }) {
+  const [failed, setFailed] = useState(false);
+  const shouldInvert = Boolean(team.invertLogo);
+  const initials = team.name
     .split(' ')
     .filter((word) => word.length > 2)
     .map((word) => word[0])
@@ -71,19 +72,32 @@ function TeamImagePlaceholder({ name, color }) {
     .slice(0, 3)
     .toUpperCase();
 
-  return (
-    <div
-      className="flex h-full min-h-[140px] flex-col items-center justify-center bg-[linear-gradient(135deg,#111,#050505)]"
-      style={{ boxShadow: `inset 0 0 60px ${color}22` }}
-    >
-      <div
-        className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl border font-display text-lg font-black text-white"
-        style={{ borderColor: `${color}66`, backgroundColor: `${color}18` }}
-      >
-        {initials}
+  if (!team.logoUrl || failed) {
+    return (
+      <div className="flex h-28 w-full items-center justify-center md:h-32">
+        <span className="font-display text-4xl font-black tracking-[0.2em] text-white/20">{initials}</span>
       </div>
-      <p className="text-xs font-bold uppercase tracking-[0.28em] text-yellow-300/80">Team Image</p>
-      <p className="mt-1 text-sm font-semibold text-zinc-400">Coming Soon</p>
+    );
+  }
+
+  return (
+    <div className="relative flex h-28 w-full items-center justify-center md:h-32">
+      <motion.img
+        src={team.logoUrl}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+        className="pointer-events-none max-h-20 w-[70%] object-contain opacity-90 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] md:max-h-24"
+        style={{
+          filter: shouldInvert
+            ? 'invert(1) brightness(1.05) drop-shadow(0 0 12px rgba(250,204,21,0.28)) drop-shadow(0 0 24px rgba(255,255,255,0.12))'
+            : 'drop-shadow(0 0 12px rgba(250,204,21,0.28)) drop-shadow(0 0 24px rgba(255,255,255,0.12))',
+        }}
+        whileHover={{ scale: 1.05, opacity: 1 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        onError={() => setFailed(true)}
+      />
     </div>
   );
 }
@@ -125,7 +139,7 @@ function DriverCard({ driverName, teamColor }) {
   return (
     <motion.div
       whileHover={{ scale: 1.03, y: -2 }}
-      className="flex items-center gap-4 rounded-2xl border border-white/10 bg-black/40 p-4 backdrop-blur-xl"
+      className="flex items-center gap-4 rounded-2xl border border-white/10 bg-black/40 p-4"
       style={{ boxShadow: `inset 3px 0 0 ${teamColor}` }}
     >
       <DriverAvatar driverName={driverName} teamColor={teamColor} />
@@ -152,21 +166,19 @@ function DriverPanel({ team, onClose }) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 16, scale: 0.98 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="overflow-hidden rounded-[2rem] border border-yellow-400/30 bg-white/[0.04] shadow-[0_0_60px_rgba(250,204,21,0.18)] backdrop-blur-xl"
+      className="overflow-hidden rounded-2xl border border-yellow-400/30 bg-[#0a0a0a] shadow-[0_0_60px_rgba(250,204,21,0.18)]"
       style={{ borderTopColor: teamColor, borderTopWidth: '3px' }}
     >
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 p-5 md:p-6">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-yellow-300">Driver Lineup</p>
-          <h3 className="mt-1 font-display text-2xl font-black uppercase text-white md:text-3xl">{team.name}</h3>
-          <p className="mt-1 text-xs font-bold uppercase tracking-[0.22em]" style={{ color: teamColor }}>
-            {team.engine} Power Unit · 2026 Season
-          </p>
+          <h3 className="mt-1 font-display text-2xl font-extrabold uppercase text-white md:text-3xl">{team.name}</h3>
+          <p className="mt-1 text-sm text-gray-400">{team.engine} · 2026 Season</p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-zinc-200 transition hover:border-yellow-400/40 hover:text-yellow-200"
+          className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#1a1a1a] px-4 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-zinc-200 transition hover:border-yellow-400/40 hover:text-yellow-200"
         >
           <FaXmark className="h-3.5 w-3.5" />
           Hide Drivers
@@ -185,73 +197,49 @@ function DriverPanel({ team, onClose }) {
   );
 }
 
-const selectedCardStyle =
-  'border-yellow-400/55 bg-yellow-400/[0.07] shadow-[0_0_56px_rgba(250,204,21,0.28)] ring-1 ring-yellow-400/25';
-
 function TeamCard({ team, index, isSelected, onViewTeam }) {
-  const teamColor = getTeamColor(team.id);
-  const isNew = team.id === 11;
-
   return (
     <Reveal delay={index * 0.06}>
       <motion.article
         id={`team-${team.id}`}
         layout
-        whileHover={isSelected ? undefined : { y: -8, scale: 1.02 }}
+        whileHover={{ y: -6 }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className={`group relative overflow-hidden rounded-[1.75rem] border bg-white/[0.03] backdrop-blur-xl transition ${
+        className={`group flex h-full flex-col overflow-hidden rounded-2xl border bg-[#0a0a0a] transition ${
           isSelected
-            ? selectedCardStyle
-            : isNew
-              ? 'border-dashed border-yellow-400/35 bg-gradient-to-br from-yellow-400/[0.06] via-white/[0.02] to-transparent hover:border-yellow-300/50 hover:shadow-[0_0_44px_rgba(250,204,21,0.2)]'
-              : 'border-white/10 hover:border-yellow-400/30 hover:shadow-[0_0_36px_rgba(250,204,21,0.15)]'
+            ? 'border-yellow-400/45 shadow-[0_0_40px_rgba(250,204,21,0.18)]'
+            : 'border-white/10 hover:border-yellow-400/30 hover:shadow-[0_0_36px_rgba(250,204,21,0.12)]'
         }`}
-        style={{ borderLeftWidth: '4px', borderLeftColor: teamColor }}
       >
-        {isSelected && (
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
-        )}
+        <button
+          type="button"
+          onClick={() => onViewTeam(team.id)}
+          className="relative min-h-[220px] flex-1 overflow-hidden px-5 pb-5 pt-5 text-left md:min-h-[240px] md:px-6 md:pt-6"
+        >
+          <span className="relative z-10 inline-flex rounded-full border border-yellow-400/40 bg-black px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-yellow-300">
+            2026 Grid
+          </span>
 
-        <div className="relative overflow-hidden">
-          <TeamImagePlaceholder name={team.name} color={teamColor} />
-
-          <div className="absolute left-4 top-4 flex items-center gap-2">
-            <span
-              className="flex h-11 w-11 items-center justify-center rounded-xl font-display text-lg font-black text-white shadow-lg"
-              style={{ backgroundColor: `${teamColor}CC` }}
-            >
-              {String(team.id).padStart(2, '0')}
-            </span>
-            {isNew && (
-              <span className="rounded-full border border-yellow-400/40 bg-yellow-400/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-yellow-200">
-                New Team
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="p-5 md:p-6">
-          <h3 className="font-display text-lg font-black uppercase leading-tight text-white md:text-xl">{team.name}</h3>
-          <p className="mt-2 text-xs font-bold uppercase tracking-[0.22em]" style={{ color: teamColor }}>
-            {team.engine} Power Unit
-          </p>
-
-          <div className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">2026 Drivers</p>
-            <p className="mt-2 text-sm font-semibold leading-6 text-zinc-200">{team.drivers.join(' · ')}</p>
+          <div className="relative z-10 mt-6">
+            <TeamLogo team={team} />
           </div>
 
-          <div className="mt-5">
-            <GlowButton
-              type="button"
-              onClick={() => onViewTeam(team.id)}
-              variant={isSelected ? 'primary' : 'secondary'}
-              className="w-full px-5 py-3 text-[11px]"
-            >
-              View Team
-              <FaArrowRight className="h-3.5 w-3.5" />
-            </GlowButton>
+          <div className="relative z-10 mt-4 max-w-[95%]">
+            <h3 className="font-display text-xl font-extrabold uppercase leading-tight tracking-wide text-white md:text-2xl">
+              {team.name}
+            </h3>
+            <p className="mt-2 text-sm text-gray-400">{team.engine}</p>
           </div>
+        </button>
+
+        <div className="border-t border-white/5 bg-[#111111] p-4 md:p-5">
+          <a
+            href="#highlights"
+            className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-[#1a1a1a] py-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-zinc-900"
+          >
+            <FaPlay className="h-3 w-3" />
+            Podcast Preview
+          </a>
         </div>
       </motion.article>
     </Reveal>
@@ -263,7 +251,7 @@ export default function Teams() {
   const selectedTeam = f1Teams2026.find((team) => team.id === selectedId) ?? null;
 
   const handleViewTeam = (id) => {
-    setSelectedId(id);
+    setSelectedId((prev) => (prev === id ? null : id));
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
       requestAnimationFrame(() => {
         document.getElementById('team-driver-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -274,13 +262,6 @@ export default function Teams() {
   return (
     <section id="teams" className="relative py-24 md:py-32">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(250,204,21,0.05),transparent_35%)]" />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(250,204,21,0.5) 40px, rgba(250,204,21,0.5) 41px)',
-        }}
-      />
 
       <div className="relative mx-auto max-w-7xl px-5 md:px-8">
         <SectionHeading eyebrow="Teams" title="F1 Teams" description={teamsIntro} />

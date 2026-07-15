@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { getDriverAvatar, getDriverInitials } from '../data/driverAvatars';
 import { standingsIntro } from '../data/standings';
 import Reveal from './ui/Reveal';
 import SectionHeading from './ui/SectionHeading';
@@ -32,18 +33,32 @@ function getSurname(fullName) {
   return fullName.split(' ').pop()?.toUpperCase() ?? fullName.toUpperCase();
 }
 
-function AvatarPlaceholder({ label }) {
-  const initials = label
-    .split(' ')
-    .map((word) => word[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+function DriverAvatar({ name, size = 'md' }) {
+  const [failed, setFailed] = useState(false);
+  const avatarUrl = getDriverAvatar(name);
+  const initials = getDriverInitials(name);
+  const sizeClass = size === 'sm' ? 'h-8 w-8 text-[10px]' : 'h-12 w-12 text-xs';
+
+  if (!avatarUrl || failed) {
+    return (
+      <div
+        className={`flex shrink-0 items-center justify-center rounded-full border border-white/10 bg-black/30 font-display font-black text-white/70 ${sizeClass}`}
+      >
+        {initials}
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-white/30 bg-black/20 font-display text-xs font-black text-white">
-      {initials}
-    </div>
+    <img
+      src={avatarUrl}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      referrerPolicy="no-referrer"
+      className={`shrink-0 rounded-full border border-white/10 object-cover object-top ${sizeClass}`}
+      onError={() => setFailed(true)}
+    />
   );
 }
 
@@ -64,7 +79,7 @@ function StartingGridCard({ position, name, points, teamColorCode, subtitle, ind
         className="flex min-w-0 flex-1 items-center gap-3 rounded-r-2xl px-3 py-2.5 md:gap-4 md:px-4 md:py-3"
         style={{ backgroundColor: teamColorCode }}
       >
-        <AvatarPlaceholder label={name} />
+        <DriverAvatar name={name} size="sm" />
 
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-base font-black uppercase tracking-wide text-white md:text-lg">

@@ -13,6 +13,7 @@ export const navItems = [
   { id: 'schedule', label: 'Schedule' },
   { id: 'tracks', label: 'Tracks' },
   { id: 'teams', label: 'Teams' },
+  { id: 'drivers', label: 'Drivers', path: '/drivers' },
   { id: 'standing', label: 'Standing' },
   { id: 'highlights', label: 'Highlights' },
   { id: 'contact', label: 'Contact' },
