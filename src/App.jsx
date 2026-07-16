@@ -6,6 +6,7 @@ import Drivers from './components/Drivers';
 import F1AssistantWidget from './components/F1AssistantWidget';
 import FanZone from './components/FanZone';
 import Footer from './components/Footer';
+import Game from './components/Game';
 import Hero from './components/Hero';
 import Highlights from './components/Highlights';
 import Journey from './components/Journey';
@@ -67,6 +68,7 @@ function HomePage() {
         <Teams />
         <Standing />
         <Highlights />
+        <Game />
         <FanZone />
         <Contact />
       </main>
