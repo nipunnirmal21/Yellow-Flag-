@@ -1,6 +1,8 @@
 /**
  * Championship standings copy + 2026 constructor logo map.
  * Live points still come from the Jolpi (Ergast) API in Standing.jsx.
+ * Driver portraits are resolved via getDriverAvatar() in ../data/driverAvatars.js
+ * (official F1 media URLs, including Albon / Hulkenberg / Perez).
  */
 export const standingsIntro =
   'Follow the current Formula 1 championship battle with Yellow Flag. Switch between Driver Standings and Constructor Standings to see the latest grid.';
@@ -10,26 +12,15 @@ const SI = 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons';
 
 /**
  * 2026 Constructor Championship teams with clean transparent logo URLs.
- * Keys match Ergast/Jolpi constructorId values.
+ * Ordered by the 2025 Constructors' Championship finishing positions
+ * (Cadillac appended as the new 2026 entry). Keys match Ergast/Jolpi constructorId values.
  */
 export const constructorStandingsData = [
-  {
-    id: 'ferrari',
-    name: 'Ferrari',
-    logoUrl: `${SI}/ferrari.svg`,
-    invertLogo: true,
-  },
   {
     id: 'mclaren',
     name: 'McLaren',
     logoUrl: `${WIKI}/d/d0/McLaren_Speedmark_(white).svg`,
     invertLogo: false,
-  },
-  {
-    id: 'red_bull',
-    name: 'Red Bull Racing',
-    logoUrl: `${SI}/redbull.svg`,
-    invertLogo: true,
   },
   {
     id: 'mercedes',
@@ -38,21 +29,33 @@ export const constructorStandingsData = [
     invertLogo: true,
   },
   {
-    id: 'aston_martin',
-    name: 'Aston Martin',
-    logoUrl: `${SI}/astonmartin.svg`,
+    id: 'red_bull',
+    name: 'Red Bull Racing',
+    logoUrl: `${SI}/redbull.svg`,
     invertLogo: true,
   },
   {
-    id: 'alpine',
-    name: 'Alpine',
-    logoUrl: `${WIKI}/7/7e/Alpine_F1_Team_Logo.svg`,
+    id: 'ferrari',
+    name: 'Ferrari',
+    logoUrl: `${SI}/ferrari.svg`,
     invertLogo: true,
   },
   {
     id: 'williams',
     name: 'Williams',
     logoUrl: `${WIKI}/1/12/Atlassian_Williams_F1_Team_logo.svg`,
+    invertLogo: true,
+  },
+  {
+    id: 'rb',
+    name: 'Racing Bulls',
+    logoUrl: `${SI}/redbull.svg`,
+    invertLogo: true,
+  },
+  {
+    id: 'aston_martin',
+    name: 'Aston Martin',
+    logoUrl: `${SI}/astonmartin.svg`,
     invertLogo: true,
   },
   {
@@ -68,16 +71,15 @@ export const constructorStandingsData = [
     invertLogo: true,
   },
   {
+    id: 'alpine',
+    name: 'Alpine',
+    logoUrl: `${WIKI}/7/7e/Alpine_F1_Team_Logo.svg`,
+    invertLogo: true,
+  },
+  {
     id: 'cadillac',
     name: 'Cadillac',
     logoUrl: `${SI}/cadillac.svg`,
-    invertLogo: true,
-  },
-  // Also on the 2026 grid (API constructorId: "rb")
-  {
-    id: 'rb',
-    name: 'Racing Bulls',
-    logoUrl: `${SI}/redbull.svg`,
     invertLogo: true,
   },
 ];

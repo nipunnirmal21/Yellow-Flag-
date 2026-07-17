@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FaPlay, FaXmark } from 'react-icons/fa6';
+import { getDriverAvatar } from '../data/driverAvatars';
 import { f1Teams2026, teamsIntro } from '../data/teams';
 import ExpandableGrid from './ui/ExpandableGrid';
 import Reveal from './ui/Reveal';
@@ -56,9 +57,12 @@ function getTeamColor(teamId) {
 
 function getDriverImage(driverName) {
   const slug = driverImageSlugs[driverName];
-  if (!slug) return null;
-  const match = Object.entries(driverImages).find(([path]) => path.includes(`/${slug}.`));
-  return match ? match[1] : null;
+  if (slug) {
+    const match = Object.entries(driverImages).find(([path]) => path.includes(`/${slug}.`));
+    if (match) return match[1];
+  }
+  // Fall back to official F1 media portraits (covers Albon, Hulkenberg, Perez, etc.).
+  return getDriverAvatar(driverName);
 }
 
 function TeamLogo({ team }) {
@@ -98,6 +102,7 @@ function TeamLogo({ team }) {
 }
 
 function DriverAvatar({ driverName, teamColor }) {
+  const [failed, setFailed] = useState(false);
   const imageSrc = getDriverImage(driverName);
   const initials = driverName
     .split(' ')
@@ -106,13 +111,16 @@ function DriverAvatar({ driverName, teamColor }) {
     .slice(0, 2)
     .toUpperCase();
 
-  if (imageSrc) {
+  if (imageSrc && !failed) {
     return (
       <img
         src={imageSrc}
         alt={driverName}
-        className="h-16 w-16 shrink-0 rounded-xl object-cover ring-2 ring-white/10"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+        className="h-16 w-16 shrink-0 rounded-xl object-cover object-top ring-2 ring-white/10"
         style={{ boxShadow: `0 0 20px ${teamColor}33` }}
+        onError={() => setFailed(true)}
       />
     );
   }
@@ -151,66 +159,96 @@ function DriverCard({ driverName, teamColor }) {
   );
 }
 
-function DriverPanel({ team, onClose }) {
+function StatBlock({ label, value }) {
+  return (
+    <div className="rounded-xl border border-white/5 bg-black/40 p-4">
+      <p className="text-xs uppercase tracking-wider text-yellow-500">{label}</p>
+      <p className="mt-1.5 text-base font-semibold leading-snug text-white">{value}</p>
+    </div>
+  );
+}
+
+function TeamModal({ team, onClose }) {
   const teamColor = getTeamColor(team.id);
 
   return (
     <motion.div
-      key={team.id}
-      initial={{ opacity: 0, y: 24, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 16, scale: 0.98 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="overflow-hidden rounded-2xl border border-yellow-400/30 bg-[#0a0a0a] shadow-[0_0_60px_rgba(250,204,21,0.18)]"
-      style={{ borderTopColor: teamColor, borderTopWidth: '3px' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
+      onClick={onClose}
     >
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 p-5 md:p-6">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-yellow-300">Driver Lineup</p>
-          <h3 className="mt-1 font-display text-2xl font-extrabold uppercase text-white md:text-3xl">{team.name}</h3>
-          <p className="mt-1 text-sm text-gray-400">{team.engine} · 2026 Season</p>
-        </div>
+      <motion.div
+        initial={{ opacity: 0, y: 32, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 24, scale: 0.96 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className="relative max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-white/10 bg-[#111]/90 p-6 shadow-2xl backdrop-blur-xl md:p-8"
+        style={{ borderTopColor: teamColor, borderTopWidth: '3px' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#1a1a1a] px-4 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-zinc-200 transition hover:border-yellow-400/40 hover:text-yellow-200"
+          aria-label="Close team details"
+          className="absolute right-4 top-4 text-gray-400 transition-colors hover:text-white"
         >
-          <FaXmark className="h-3.5 w-3.5" />
-          Hide Drivers
+          <FaXmark className="h-5 w-5" />
         </button>
-      </div>
 
-      <div className="p-5 md:p-6">
-        <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-400">Main Drivers</p>
+        {/* Header */}
+        <div className="flex items-center gap-5 pr-10">
+          <TeamLogo team={team} />
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-yellow-300">2026 Grid</p>
+            <h3 className="mt-1 font-display text-2xl font-extrabold uppercase leading-tight text-white md:text-3xl">
+              {team.name}
+            </h3>
+            <p className="mt-1 text-sm text-gray-400">{team.engine}</p>
+          </div>
+        </div>
+
+        {/* Description */}
+        <p className="mt-6 text-sm leading-7 text-gray-300 md:text-base">{team.description}</p>
+
+        {/* Stats grid */}
+        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+          <StatBlock label="Country / Base" value={team.country} />
+          <StatBlock label="Constructors' Championships" value={team.championships} />
+          <StatBlock label="Team Principal" value={team.teamPrincipal} />
+          <StatBlock label="Owner" value={team.owner} />
+          <StatBlock label="Main Sponsor" value={team.mainSponsor} />
+          <StatBlock label="Power Unit" value={team.engine} />
+        </div>
+
+        {/* Driver lineup */}
+        <p className="mb-3 mt-8 text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-400">
+          2026 Driver Lineup
+        </p>
         <div className="grid gap-3 sm:grid-cols-2">
           {team.drivers.map((driverName) => (
             <DriverCard key={driverName} driverName={driverName} teamColor={teamColor} />
           ))}
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
 
-function TeamCard({ team, index, isSelected, onViewTeam }) {
+function TeamCard({ team, index, onSelect }) {
   return (
     <Reveal delay={index * 0.06}>
       <motion.article
         id={`team-${team.id}`}
         layout
-        whileHover={{ y: -6 }}
+        whileHover={{ y: -6, scale: 1.02 }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className={`group flex h-full flex-col overflow-hidden rounded-2xl border bg-[#0a0a0a] transition ${
-          isSelected
-            ? 'border-yellow-400/45 shadow-[0_0_40px_rgba(250,204,21,0.18)]'
-            : 'border-white/10 hover:border-yellow-400/30 hover:shadow-[0_0_36px_rgba(250,204,21,0.12)]'
-        }`}
+        onClick={() => onSelect(team)}
+        className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] transition hover:border-yellow-400/30 hover:shadow-[0_0_36px_rgba(250,204,21,0.12)]"
       >
-        <button
-          type="button"
-          onClick={() => onViewTeam(team.id)}
-          className="relative flex-1 overflow-hidden px-5 pb-5 pt-5 text-left md:px-6 md:pt-6"
-        >
+        <div className="relative flex-1 overflow-hidden px-5 pb-5 pt-5 text-left md:px-6 md:pt-6">
           <div className="relative z-10 flex items-start justify-between gap-4">
             <span className="inline-flex rounded-full border border-yellow-400/40 bg-black px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-yellow-300">
               2026 Grid
@@ -223,12 +261,16 @@ function TeamCard({ team, index, isSelected, onViewTeam }) {
               {team.name}
             </h3>
             <p className="mt-2 text-sm text-gray-400">{team.engine}</p>
+            <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 transition group-hover:text-yellow-300">
+              Click for team details
+            </p>
           </div>
-        </button>
+        </div>
 
         <div className="border-t border-white/5 bg-[#111111] p-4 md:p-5">
           <a
             href="#highlights"
+            onClick={(e) => e.stopPropagation()}
             className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-[#1a1a1a] py-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-zinc-900"
           >
             <FaPlay className="h-3 w-3" />
@@ -241,17 +283,21 @@ function TeamCard({ team, index, isSelected, onViewTeam }) {
 }
 
 export default function Teams() {
-  const [selectedId, setSelectedId] = useState(null);
-  const selectedTeam = f1Teams2026.find((team) => team.id === selectedId) ?? null;
+  const [selectedTeam, setSelectedTeam] = useState(null);
 
-  const handleViewTeam = (id) => {
-    setSelectedId((prev) => (prev === id ? null : id));
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-      requestAnimationFrame(() => {
-        document.getElementById('team-driver-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      });
-    }
-  };
+  // Lock page scroll and allow Escape to close while the modal is open.
+  useEffect(() => {
+    if (!selectedTeam) return undefined;
+    document.body.style.overflow = 'hidden';
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setSelectedTeam(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [selectedTeam]);
 
   return (
     <section id="teams" className="relative py-24 md:py-32">
@@ -262,21 +308,13 @@ export default function Teams() {
 
         <ExpandableGrid expandLabel="See More" collapseLabel="See Less" collapsedMaxHeight="max-h-[720px]">
           {f1Teams2026.map((team, index) => (
-            <TeamCard
-              key={team.id}
-              team={team}
-              index={index}
-              isSelected={selectedId === team.id}
-              onViewTeam={handleViewTeam}
-            />
+            <TeamCard key={team.id} team={team} index={index} onSelect={setSelectedTeam} />
           ))}
         </ExpandableGrid>
 
-        <div id="team-driver-panel" className="mt-8">
-          <AnimatePresence mode="wait">
-            {selectedTeam && <DriverPanel team={selectedTeam} onClose={() => setSelectedId(null)} />}
-          </AnimatePresence>
-        </div>
+        <AnimatePresence>
+          {selectedTeam && <TeamModal team={selectedTeam} onClose={() => setSelectedTeam(null)} />}
+        </AnimatePresence>
       </div>
     </section>
   );

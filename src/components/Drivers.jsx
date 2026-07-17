@@ -10,6 +10,7 @@ const TEAM_COLORS = {
   Ferrari: '#E80020',
   McLaren: '#FF8000',
   'Red Bull Racing': '#3671C6',
+  'Racing Bulls': '#6692FF',
   'Red Bull / RB': '#6692FF',
   Alpine: '#0093CC',
   Haas: '#B6BABD',

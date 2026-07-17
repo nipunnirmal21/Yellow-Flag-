@@ -1,10 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, Flag, Lock, RotateCcw, Trophy } from 'lucide-react';
+import abuDhabi from '../assets/tracks/abu-dhabi.svg';
+import australia from '../assets/tracks/australia.svg';
+import china from '../assets/tracks/china.svg';
+import japan from '../assets/tracks/japan.svg';
+import monaco from '../assets/tracks/monaco.svg';
+import monza from '../assets/tracks/monza.svg';
+import silverstone from '../assets/tracks/silverstone.svg';
+import singapore from '../assets/tracks/singapore.svg';
 import { TRACKS, getTrackGeometry } from '../data/racerTracks';
 
 const CANVAS_W = 960;
 const CANVAS_H = 600;
+
+const TRACK_SVGS = {
+  'abu-dhabi': abuDhabi,
+  australia,
+  china,
+  japan,
+  monaco,
+  monza,
+  silverstone,
+  singapore,
+};
 const UNLOCKED_KEY = 'yf-racer-unlocked';
 const RESULTS_KEY = 'yf-racer-results';
 const TOTAL_ROUNDS = TRACKS.length;
@@ -63,9 +82,11 @@ function nearestSegment(pts, x, y, centerIdx, windowSize) {
 }
 
 // The static track ribbon is rendered once to an offscreen canvas; the race
-// loop only blits it, keeping per-frame work to car sprites alone.
+// loop only blits it, keeping per-frame work to car sprites alone. The ribbon
+// is stroked directly from the authentic SVG Path2D, so the visible tarmac is
+// the exact real-world circuit shape.
 function buildTrackLayer(track, dpr) {
-  const { pts } = getTrackGeometry(track);
+  const { pts, path2d } = getTrackGeometry(track);
   const canvas = document.createElement('canvas');
   canvas.width = CANVAS_W * dpr;
   canvas.height = CANVAS_H * dpr;
@@ -81,10 +102,7 @@ function buildTrackLayer(track, dpr) {
     }
   }
 
-  const path = new Path2D();
-  path.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) path.lineTo(pts[i].x, pts[i].y);
-  path.closePath();
+  const path = path2d;
 
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
@@ -288,7 +306,7 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
   // Game engine: init cars, run simulation + render loop.
   useEffect(() => {
     const geometry = getTrackGeometry(track);
-    const { pts, n } = geometry;
+    const { pts, n, racingLine, speedFactor, path2d } = geometry;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const canvas = canvasRef.current;
@@ -298,18 +316,23 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
     ctx.scale(dpr, dpr);
     const trackLayer = buildTrackLayer(track, dpr);
 
-    // AI difficulty scales with championship progress but stays well below
-    // the player's pace (top speed ~2.7-3.5 vs the player's 5.5), brakes
-    // early and hard for corners, and takes wide sloppy lines early season.
+    // Untransformed 1x context used purely for hit-testing the authentic SVG
+    // path: a point is on the tarmac iff it lies within the stroked ribbon.
+    const collisionCtx = document.createElement('canvas').getContext('2d');
+    collisionCtx.lineWidth = track.width;
+    collisionCtx.lineJoin = 'round';
+    collisionCtx.lineCap = 'round';
+    const isOnTrack = (x, y) => collisionCtx.isPointInStroke(path2d, x, y);
+
+    // AI difficulty scales with championship progress. Pace is high enough to
+    // punish any player mistake; the apex-hugging racing line means the AI
+    // carries real speed through corners too.
     const skill = (track.round - 1) / (TOTAL_ROUNDS - 1);
     const aiTuning = (i) => ({
-      maxSpeed: 2.7 + skill * 0.8 - i * 0.1,
-      accel: 0.045,
-      turnClamp: 0.055 + skill * 0.02,
-      cornerCoef: 2.0 - skill * 0.5,
-      offsetMag: (3 + i * 1.5) * (1 - skill * 0.85),
-      wobbleAmp: (1 - skill) * 3,
-      wobblePhase: i * 2.1,
+      maxSpeed: 4.2 + skill * 1.15 - i * 0.11,
+      accel: 0.072,
+      turnClamp: 0.098 + skill * 0.024,
+      lineOffset: (i - 1.5) * 1.4 * (1 - skill * 0.7),
     });
 
     // Grid: AI in slots 1-4, player starts last (P5).
@@ -333,7 +356,7 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
         segIdx: idx,
         lastS: idx,
         totalProgress: idx - n,
-        lineSide: side,
+        offTrack: false,
         finished: false,
         finishOrder: 0,
       };
@@ -341,6 +364,17 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
 
     const finishLine = track.laps * n;
     const maxOffset = track.width / 2 - 9;
+
+    // Average centerline segment length, for progress-gap -> pixel conversion.
+    let perimeter = 0;
+    for (let i = 0; i < n; i++) {
+      const a = pts[i];
+      const b = pts[(i + 1) % n];
+      perimeter += Math.hypot(b.x - a.x, b.y - a.y);
+    }
+    const pxPerSeg = perimeter / n;
+    // Smoothed global rubber-band multiplier applied to all AI cars.
+    let aiBoost = 1;
 
     const sortStandings = () =>
       [...carsRef.current].sort((a, b) => {
@@ -368,14 +402,29 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
 
     const updateProgress = (car) => {
       const near = nearestSegment(pts, car.x, car.y, car.segIdx, 15);
-      // Wall clamp: pull the car back inside the track ribbon. The player
-      // only gets a gentle scrub so brushing a wall never kills the run.
-      if (near.dist > maxOffset) {
-        const nx = (car.x - near.qx) / (near.dist || 1);
-        const ny = (car.y - near.qy) / (near.dist || 1);
-        car.x = near.qx + nx * maxOffset;
-        car.y = near.qy + ny * maxOffset;
-        car.speed *= car.isPlayer ? 0.97 : 0.9;
+      // Boundary check against the authentic SVG path: leaving the stroked
+      // ribbon costs the player a one-time 45% speed cut (roughly 1-2
+      // positions, still recoverable); continued scraping only scrubs
+      // lightly. A hard clamp then pulls the car back onto the surface so it
+      // can never escape the circuit.
+      const outside = !isOnTrack(car.x, car.y);
+      if (outside || near.dist > maxOffset) {
+        if (near.dist > maxOffset) {
+          const nx = (car.x - near.qx) / (near.dist || 1);
+          const ny = (car.y - near.qy) / (near.dist || 1);
+          car.x = near.qx + nx * maxOffset;
+          car.y = near.qy + ny * maxOffset;
+        }
+        if (!car.isPlayer) {
+          car.speed *= 0.9;
+        } else if (!car.offTrack) {
+          car.offTrack = true;
+          car.speed *= 0.55;
+        } else {
+          car.speed *= 0.995;
+        }
+      } else {
+        car.offTrack = false;
       }
       car.segIdx = near.idx;
       const s = near.idx + near.t;
@@ -392,11 +441,26 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
       }
     };
 
-    const simulate = (dt, time) => {
+    const simulate = (dt) => {
       const racing = raceStateRef.current === 'racing';
       const keys = keysRef.current;
 
       const playerCar = carsRef.current[carsRef.current.length - 1];
+
+      // Dynamic rubber-banding: if the player pulls clear of the leading AI,
+      // the whole pack surges to hunt them down quickly; if the player drops
+      // well behind the last AI, the pack eases off only slightly, so a
+      // mistake still costs real time. The multiplier lerps smoothly so pace
+      // changes are never visible jumps.
+      let targetBoost = 1;
+      if (!playerCar.finished) {
+        const aiCars = carsRef.current.filter((c) => !c.isPlayer);
+        const leadAI = Math.max(...aiCars.map((c) => c.totalProgress));
+        const lastAI = Math.min(...aiCars.map((c) => c.totalProgress));
+        if ((playerCar.totalProgress - leadAI) * pxPerSeg > 220) targetBoost = 1.18;
+        else if ((lastAI - playerCar.totalProgress) * pxPerSeg > 350) targetBoost = 0.92;
+      }
+      aiBoost += (targetBoost - aiBoost) * Math.min(1, 0.035 * dt);
 
       for (const car of carsRef.current) {
         if (car.isPlayer) {
@@ -412,29 +476,35 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
           car.speed *= Math.pow(0.988, dt);
           if (Math.abs(car.speed) < 0.02 && !keys.up && !keys.down) car.speed = 0;
         } else {
-          // AI: steer toward a look-ahead point on its racing line. Early in
-          // the season the line wanders wide (wobble); late season it locks
-          // onto the centerline apex.
+          // AI: chase a look-ahead point on the apex-hugging racing line
+          // derived from the real circuit shape. A small per-car lateral
+          // offset stops the pack forming a perfect train without pulling
+          // anyone meaningfully off the ideal line.
           const lookIdx = (car.segIdx + 5) % n;
-          const lp = pts[lookIdx];
-          const lq = pts[(lookIdx + 1) % n];
+          const lp = racingLine[lookIdx];
+          const lq = racingLine[(lookIdx + 1) % n];
           const tangent = Math.atan2(lq.y - lp.y, lq.x - lp.x);
-          const offset =
-            car.lineSide * car.offsetMag + Math.sin(time * 0.0012 + car.wobblePhase) * car.wobbleAmp;
-          const tx = lp.x + Math.cos(tangent + Math.PI / 2) * offset;
-          const ty = lp.y + Math.sin(tangent + Math.PI / 2) * offset;
+          const tx = lp.x + Math.cos(tangent + Math.PI / 2) * car.lineOffset;
+          const ty = lp.y + Math.sin(tangent + Math.PI / 2) * car.lineOffset;
           const diff = normalizeAngle(Math.atan2(ty - car.y, tx - car.x) - car.heading);
           car.heading += clamp(diff, -car.turnClamp * dt, car.turnClamp * dt);
-          let target = car.maxSpeed * (1 - Math.min(0.65, Math.abs(diff) * car.cornerCoef));
-          // Rubber-banding: an AI more than ~1/8 lap ahead of the player
-          // backs off so the player can always catch back up.
-          if (!playerCar.finished && car.totalProgress - playerCar.totalProgress > n * 0.12) {
-            target *= 0.8;
+
+          // Brake for the tightest curvature in the upcoming window, so the
+          // AI slows just enough for the corner and fires out of the apex.
+          let cornerGrip = 1;
+          for (let a = 2; a <= 12; a++) {
+            const sf = speedFactor[(car.segIdx + a) % n];
+            if (sf < cornerGrip) cornerGrip = sf;
           }
+          const target =
+            car.maxSpeed *
+            aiBoost *
+            Math.max(0.6, cornerGrip) *
+            (1 - Math.min(0.25, Math.abs(diff) * 0.7));
           car.speed =
             car.speed < target
-              ? Math.min(target, car.speed + car.accel * dt)
-              : Math.max(target, car.speed - 0.1 * dt);
+              ? Math.min(target, car.speed + car.accel * aiBoost * dt)
+              : Math.max(target, car.speed - 0.12 * dt);
         }
 
         car.x += Math.cos(car.heading) * car.speed * dt;
@@ -496,7 +566,7 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
     const loop = (time) => {
       const dt = lastTimeRef.current ? Math.min((time - lastTimeRef.current) / 16.667, 2.5) : 1;
       lastTimeRef.current = time;
-      if (raceStateRef.current !== 'countdown') simulate(dt, time);
+      if (raceStateRef.current !== 'countdown') simulate(dt);
       draw();
       updateHud();
       rafRef.current = requestAnimationFrame(loop);
@@ -625,7 +695,7 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
                   <span className="font-bold text-yellow-400">+{result.points} pts</span>.{' '}
                   {result.victory
                     ? isLastTrack
-                      ? 'Championship complete — you conquered all 22 rounds!'
+                      ? `Championship complete — you conquered all ${TOTAL_ROUNDS} rounds!`
                       : 'Next race unlocked!'
                     : 'Finish on the podium (top 3) to advance. Try again!'}
                 </p>
@@ -764,22 +834,16 @@ function ChampionshipCalendar({ unlocked, results, onPick, onExit, onReset }) {
                 {!isUnlocked && <Lock className="h-3.5 w-3.5 text-zinc-600" />}
               </div>
 
-              <svg
-                viewBox="0 0 960 600"
-                className={`w-full ${
-                  isUnlocked ? 'text-zinc-400 group-hover:text-yellow-400' : 'text-zinc-700'
-                }`}
+              <img
+                src={TRACK_SVGS[track.id]}
+                alt=""
                 aria-hidden="true"
-              >
-                <polygon
-                  points={track.points.map(([x, y]) => `${x},${y}`).join(' ')}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="24"
-                  strokeLinejoin="round"
-                  className="transition-colors duration-300"
-                />
-              </svg>
+                className={`w-full rounded-lg object-contain transition duration-300 ${
+                  isUnlocked
+                    ? 'opacity-90 group-hover:opacity-100 group-hover:brightness-110'
+                    : 'opacity-40 grayscale'
+                }`}
+              />
 
               <div>
                 <h4

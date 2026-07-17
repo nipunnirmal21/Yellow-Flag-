@@ -1,12 +1,8 @@
-const F1_MEDIA = 'https://media.formula1.com/image/upload/c_fill,w_400,h_400,g_face/q_auto/v1740000000/common/f1/2026';
-const F1_LEGACY = 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers';
+const F1_MEDIA =
+  'https://media.formula1.com/image/upload/c_fill,w_400,h_400,g_face/q_auto/v1740000000/common/f1/2026';
 
 function webp(team, code) {
   return `${F1_MEDIA}/${team}/${code}/2026${team}${code}right.webp`;
-}
-
-function legacy(letter, folder, code) {
-  return `${F1_LEGACY}/${letter}/${folder}/${code}.png`;
 }
 
 /** Official F1 media headshots keyed by canonical full name. */
@@ -23,24 +19,40 @@ export const driverAvatars = {
   'Arvid Lindblad': webp('racingbulls', 'arvlin01'),
   'Gabriel Bortoleto': webp('audi', 'gabbor01'),
   'Nico Hulkenberg': webp('audi', 'nichul01'),
+  'Nico Hülkenberg': webp('audi', 'nichul01'),
   'Ollie Bearman': webp('haas', 'olibea01'),
   'Oliver Bearman': webp('haas', 'olibea01'),
   'Esteban Ocon': webp('haas', 'estoco01'),
   'Pierre Gasly': webp('alpine', 'piegas01'),
-  'Alex Albon': legacy('A', 'ALXALB01_Alexander_Albon', 'alexal001'),
-  'Alexander Albon': legacy('A', 'ALXALB01_Alexander_Albon', 'alexal001'),
+  'Alex Albon': webp('williams', 'alealb01'),
+  'Alexander Albon': webp('williams', 'alealb01'),
   'Franco Colapinto': webp('alpine', 'fracol01'),
   'Fernando Alonso': webp('astonmartin', 'feralo01'),
   'Sergio Perez': webp('cadillac', 'serper01'),
+  'Sergio Pérez': webp('cadillac', 'serper01'),
   'Valtteri Bottas': webp('cadillac', 'valbot01'),
   'Max Verstappen': webp('redbullracing', 'maxver01'),
   'Carlos Sainz': webp('williams', 'carsai01'),
   'Lance Stroll': webp('astonmartin', 'lanstr01'),
 };
 
+function normalizeName(name) {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function getDriverAvatar(name) {
   if (!name) return null;
-  return driverAvatars[name] ?? null;
+  if (driverAvatars[name]) return driverAvatars[name];
+  const normalized = normalizeName(name);
+  if (driverAvatars[normalized]) return driverAvatars[normalized];
+  const match = Object.entries(driverAvatars).find(
+    ([key]) => normalizeName(key) === normalized
+  );
+  return match ? match[1] : null;
 }
 
 export function getDriverInitials(name) {
