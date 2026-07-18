@@ -40,19 +40,10 @@ export default function Hero() {
           </svg>
         </div>
 
-        <motion.div
-          className="absolute right-[8%] top-[22%] hidden h-28 w-40 md:block"
-          animate={{ rotate: [0, 4, -2, 0], y: [0, -6, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <div className="h-full w-full rounded-sm bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 shadow-[0_0_40px_rgba(250,204,21,0.45)]" />
-          <div className="absolute inset-x-2 top-3 h-1 rounded-full bg-black/20" />
-          <div className="absolute inset-x-2 top-6 h-1 rounded-full bg-black/20" />
-        </motion.div>
       </motion.div>
 
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-5 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-        <div>
+      <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-5 text-center md:px-8">
+        <div className="flex flex-col items-center">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -94,7 +85,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.45 }}
-            className="mt-10 flex flex-wrap gap-4"
+            className="mt-10 flex flex-wrap justify-center gap-4"
           >
             <GlowButton href="#highlights">
               <FaPlay className="h-4 w-4" />
@@ -105,43 +96,6 @@ export default function Hero() {
             </GlowButton>
           </motion.div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.35 }}
-          className="relative"
-        >
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-1 shadow-[0_0_60px_rgba(250,204,21,0.12)] backdrop-blur-xl">
-            <div className="rounded-[1.85rem] bg-gradient-to-br from-zinc-900 via-black to-zinc-900 p-6 md:p-8">
-              <div className="mb-6 flex items-center justify-between text-[11px] uppercase tracking-[0.28em] text-zinc-400">
-                <span>Telemetry</span>
-                <span className="text-yellow-300">On Track</span>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  ['Lap', '58 / 58'],
-                  ['Mode', 'Race'],
-                  ['Sector', 'S3 Live'],
-                  ['Status', 'Yellow Flag'],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-2xl border border-white/10 bg-black/40 p-4">
-                    <p className="text-[10px] uppercase tracking-[0.25em] text-zinc-500">{label}</p>
-                    <p className="mt-2 font-display text-xl font-bold text-white">{value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 h-2 overflow-hidden rounded-full bg-zinc-800">
-                <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-yellow-500 via-yellow-300 to-white"
-                  initial={{ width: '0%' }}
-                  animate={{ width: '88%' }}
-                  transition={{ duration: 1.4, delay: 0.8, ease: 'easeOut' }}
-                />
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </section>
   );
