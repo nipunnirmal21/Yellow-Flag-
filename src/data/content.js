@@ -8,13 +8,13 @@ export const BRAND = {
 
 export const navItems = [
   { id: 'home', label: 'Home' },
+  { id: 'episodes', label: 'Episodes' },
   { id: 'about', label: 'About' },
   { id: 'journey', label: 'Journey' },
   { id: 'schedule', label: 'Schedule' },
   { id: 'tracks', label: 'Tracks' },
   { id: 'teams', label: 'Teams' },
   { id: 'standing', label: 'Standing' },
-  { id: 'highlights', label: 'Highlights' },
   { id: 'contact', label: 'Contact' },
 ];
 
@@ -54,16 +54,9 @@ export const timelineItems = [
   { year: '06', title: 'Future of Yellow Flag', text: 'Bigger episodes, stronger visuals, and deeper F1 coverage for every Sri Lankan fan.' },
 ];
 
-export const highlightCards = [
-  { title: 'Best Race Reactions', text: 'Raw Grand Prix reactions and honest post-race breakdowns in Sinhala.', accent: 'from-yellow-500/35 to-yellow-300/5' },
-  { title: 'Driver Battle Discussions', text: 'Teammate wars, rivalries, and on-track drama explained clearly.', accent: 'from-white/15 to-yellow-400/10' },
-  { title: 'Grand Prix Predictions', text: 'Bold previews, circuit analysis, and prediction episodes before lights out.', accent: 'from-yellow-400/25 to-transparent' },
-  { title: 'Funny Podcast Moments', text: 'Entertaining banter, fan energy, and memorable podcast clips.', accent: 'from-zinc-500/20 to-yellow-500/10' },
-];
-
 export const socialLinks = [
-  { id: 'youtube', label: 'YouTube', url: '#' },
-  { id: 'tiktok', label: 'TikTok', url: '#' },
-  { id: 'facebook', label: 'Facebook', url: '#' },
-  { id: 'instagram', label: 'Instagram', url: '#' },
+  { id: 'youtube', label: 'YouTube', url: 'https://www.youtube.com/@YellowFlagpod' },
+  { id: 'tiktok', label: 'TikTok', url: 'https://www.tiktok.com/@yellowflag_podcast' },
+  { id: 'facebook', label: 'Facebook', url: 'https://www.facebook.com/people/Yellow-Flag-Pod/61574284559812/' },
+  { id: 'instagram', label: 'Instagram', url: 'https://www.instagram.com/yellowflag_pod/' },
 ];

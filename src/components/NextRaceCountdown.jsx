@@ -31,11 +31,11 @@ function TrackOutline() {
 
 function CountdownCell({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/50 p-3 text-center md:p-4">
-      <p className="font-display text-2xl font-black tabular-nums text-white md:text-3xl">
+    <div className="rounded-md border border-white/10 bg-panel-2 p-3 text-center md:p-4">
+      <p className="font-display text-2xl font-black tabular-nums text-chequer md:text-3xl">
         {String(value).padStart(2, '0')}
       </p>
-      <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-zinc-500">{label}</p>
+      <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.25em] text-steel">{label}</p>
     </div>
   );
 }
@@ -52,8 +52,8 @@ export default function NextRaceCountdown() {
 
   if (!race) {
     return (
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-1 shadow-[0_0_60px_rgba(250,204,21,0.12)] backdrop-blur-xl">
-        <div className="relative rounded-[1.85rem] bg-gradient-to-br from-zinc-900 via-black to-zinc-900 p-6 md:p-8">
+      <div className="relative overflow-hidden rounded-xl border border-white/10 bg-panel-2 p-1">
+        <div className="relative rounded-lg bg-carbon p-6 md:p-8">
           <TrackOutline />
           <div className="relative">
             <p className="text-[11px] uppercase tracking-[0.28em] text-zinc-400">2026 Season</p>
@@ -71,8 +71,8 @@ export default function NextRaceCountdown() {
   const seasonProgress = ((race.round - 1) / race.totalRounds) * 100;
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-1 shadow-[0_0_60px_rgba(250,204,21,0.12)] backdrop-blur-xl">
-      <div className="relative overflow-hidden rounded-[1.85rem] bg-gradient-to-br from-zinc-900 via-black to-zinc-900 p-6 md:p-8">
+    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-panel-2 p-1">
+      <div className="relative overflow-hidden rounded-lg bg-carbon p-6 md:p-8">
         <div
           className="absolute inset-y-0 left-0 w-1.5 opacity-80"
           style={{ background: 'repeating-linear-gradient(180deg, #e10600 0 16px, #f5f5f5 16px 32px)' }}

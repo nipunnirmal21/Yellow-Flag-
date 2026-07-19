@@ -14,11 +14,14 @@ export function SocialIcon({ id, className = 'h-5 w-5' }) {
   return <Icon className={className} aria-hidden="true" />;
 }
 
+/**
+ * Global backdrop: pure black plus fixed texture only. All colour and depth now
+ * comes from each section's own <SectionAtmosphere />, so this layer must stay
+ * neutral — anything tinted here would wash the section fades out.
+ */
 export default function BackgroundEffects() {
   return (
-    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.08),transparent_32%),radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.04),transparent_24%),linear-gradient(180deg,#050505_0%,#0a0a0a_45%,#050505_100%)]" />
-
+    <div className="pointer-events-none fixed inset-0 -z-20 overflow-hidden bg-black">
       <div
         className="absolute inset-0 opacity-[0.04]"
         style={{
@@ -37,7 +40,7 @@ export default function BackgroundEffects() {
         }}
       />
 
-      <svg className="absolute inset-0 h-full w-full opacity-20" viewBox="0 0 1440 900" preserveAspectRatio="none">
+      <svg className="absolute inset-0 h-full w-full opacity-[0.12]" viewBox="0 0 1440 900" preserveAspectRatio="none">
         <motion.path
           d="M-40 720 C 220 560, 420 860, 700 680 S 1180 420, 1500 560"
           fill="none"
@@ -58,26 +61,8 @@ export default function BackgroundEffects() {
         />
       </svg>
 
-      {[...Array(6)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"
-          style={{ top: `${18 + i * 14}%`, left: '-20%', width: '140%' }}
-          animate={{ x: ['0%', '8%', '0%'], opacity: [0.15, 0.45, 0.15] }}
-          transition={{ duration: 4 + i * 0.4, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      ))}
-
-      <motion.div
-        className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-yellow-400/10 blur-3xl"
-        animate={{ scale: [1, 1.08, 1], opacity: [0.35, 0.55, 0.35] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="absolute -left-16 bottom-24 h-64 w-64 rounded-full bg-red-600/10 blur-3xl"
-        animate={{ scale: [1, 1.12, 1], opacity: [0.2, 0.35, 0.2] }}
-        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-      />
+      {/* Vignette: pulls the eye to centre and keeps edges truly black. */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_50%_50%,transparent_45%,rgba(0,0,0,0.75)_100%)]" />
     </div>
   );
 }

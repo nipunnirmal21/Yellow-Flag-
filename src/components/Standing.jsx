@@ -1,32 +1,13 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { standingsIntro } from '../data/standings';
+import { getTeamColorByConstructorId as getTeamColor } from '../data/teamColors';
 import Reveal from './ui/Reveal';
 import SectionHeading from './ui/SectionHeading';
+import SectionAtmosphere from './ui/SectionAtmosphere';
 
 const DRIVER_STANDINGS_URL = 'https://api.jolpi.ca/ergast/f1/current/driverStandings.json';
 const CONSTRUCTOR_STANDINGS_URL = 'https://api.jolpi.ca/ergast/f1/current/constructorStandings.json';
-
-const TEAM_COLORS = {
-  red_bull: '#3671C6',
-  ferrari: '#E80020',
-  mclaren: '#FF8000',
-  mercedes: '#27F4D2',
-  alpine: '#0093CC',
-  rb: '#6692FF',
-  racing_bulls: '#6692FF',
-  haas: '#B6BABD',
-  williams: '#005AFF',
-  audi: '#52E252',
-  sauber: '#52E252',
-  kick_sauber: '#52E252',
-  aston_martin: '#006F62',
-  cadillac: '#C4A052',
-};
-
-function getTeamColor(constructorId) {
-  return TEAM_COLORS[constructorId] ?? '#FACC15';
-}
 
 function getSurname(fullName) {
   return fullName.split(' ').pop()?.toUpperCase() ?? fullName.toUpperCase();
@@ -53,15 +34,14 @@ function StartingGridCard({ position, name, points, teamColorCode, subtitle, ind
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.025, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ scale: 1.02 }}
-      className="flex flex-row items-stretch overflow-hidden shadow-lg"
+      className="flex flex-row items-stretch overflow-hidden rounded-lg"
     >
-      <div className="flex w-14 shrink-0 items-center justify-center rounded-l-2xl bg-white md:w-16">
-        <span className="font-display text-2xl font-black text-black md:text-3xl">{position}</span>
+      <div className="flex w-14 shrink-0 items-center justify-center bg-chequer md:w-16">
+        <span className="font-display text-2xl font-black tabular-nums text-black md:text-3xl">{position}</span>
       </div>
 
       <div
-        className="flex min-w-0 flex-1 items-center gap-3 rounded-r-2xl px-3 py-2.5 md:gap-4 md:px-4 md:py-3"
+        className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 md:gap-4 md:px-4 md:py-3"
         style={{ backgroundColor: teamColorCode }}
       >
         <AvatarPlaceholder label={name} />
@@ -93,10 +73,10 @@ function ViewModeButton({ active, children, onClick }) {
       onClick={onClick}
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
-      className={`rounded-full px-7 py-4 text-xs font-black uppercase tracking-[0.2em] transition md:px-10 md:text-sm ${
+      className={`rounded-full px-7 py-4 text-xs font-black uppercase tracking-[0.2em] transition duration-150 md:px-10 md:text-sm ${
         active
-          ? 'bg-yellow-400 text-black shadow-[0_0_40px_rgba(250,204,21,0.45)]'
-          : 'border-2 border-white/20 bg-white/10 text-white hover:border-yellow-400/50 hover:bg-white/15'
+          ? 'bg-flag text-black shadow-[0_0_28px_rgba(255,212,0,0.28)]'
+          : 'border border-white/15 bg-panel-2 text-chequer hover:border-flag/60 hover:text-flag'
       }`}
     >
       {children}
@@ -116,18 +96,13 @@ function StandingsSkeleton() {
         <p className="text-xs font-bold uppercase tracking-[0.28em] text-zinc-400">Loading live standings</p>
       </div>
 
-      <div className="grid w-full grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
-        {Array.from({ length: 8 }, (_, index) => {
-          const isEvenPosition = (index + 1) % 2 === 0;
-          return (
-            <div key={index} className={isEvenPosition ? 'md:mt-10' : undefined}>
-              <div className="flex overflow-hidden">
-                <div className="h-[4.5rem] w-14 shrink-0 animate-pulse rounded-l-2xl bg-white/90 md:w-16" />
-                <div className="h-[4.5rem] flex-1 animate-pulse rounded-r-2xl bg-white/10" />
-              </div>
-            </div>
-          );
-        })}
+      <div className="grid w-full grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2">
+        {Array.from({ length: 8 }, (_, index) => (
+          <div key={index} className="flex overflow-hidden rounded-lg">
+            <div className="h-[4.5rem] w-14 shrink-0 animate-pulse bg-chequer/90 md:w-16" />
+            <div className="h-[4.5rem] flex-1 animate-pulse bg-white/10" />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -143,26 +118,20 @@ function StartingGridView({ items, mode, season }) {
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="mb-8 text-center">
-        <h3 className="font-display text-3xl font-black uppercase italic leading-none tracking-tight text-white md:text-5xl">
-          <span className="text-white">Championship </span>
-          <span className="text-red-600">Grid</span>
+        <h3 className="font-display text-3xl font-black uppercase italic leading-none tracking-tight text-chequer md:text-5xl">
+          Championship <span className="text-flag">Grid</span>
         </h3>
-        <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-zinc-400 md:text-sm">
+        <p className="mt-2 text-xs font-bold uppercase tracking-[0.28em] text-steel md:text-sm">
           {mode === 'drivers'
             ? `${season || '2026'} Driver Standings`
             : `${season || '2026'} Constructor Standings`}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2">
         {items.map((item, index) => {
-          const isEvenPosition = item.position % 2 === 0;
-
           return (
-            <div
-              key={`${mode}-${item.position}-${item.name || item.team}`}
-              className={isEvenPosition ? 'md:mt-10' : undefined}
-            >
+            <div key={`${mode}-${item.position}-${item.name || item.team}`}>
               <StartingGridCard
                 position={item.position}
                 name={mode === 'drivers' ? item.name : item.team}
@@ -261,7 +230,7 @@ export default function Standing() {
 
   return (
     <section id="standing" className="relative py-24 md:py-32">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.08),transparent_35%),radial-gradient(circle_at_30%_20%,rgba(250,204,21,0.05),transparent_40%)]" />
+      <SectionAtmosphere variant="duel" />
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{
@@ -275,7 +244,7 @@ export default function Standing() {
       <div className="relative mx-auto max-w-5xl px-5 md:px-8">
         <Reveal>
           <SectionHeading eyebrow="Championship" title="Standing" description={standingsIntro} />
-          <p className="-mt-8 mb-10 text-center text-xs font-semibold uppercase tracking-[0.22em] text-yellow-300/80">
+          <p className="-mt-8 mb-10 text-xs font-semibold uppercase tracking-[0.22em] text-flag/80">
             {lastUpdated}
           </p>
         </Reveal>
@@ -291,7 +260,7 @@ export default function Standing() {
           </div>
         </Reveal>
 
-        <div className="rounded-[2rem] border border-white/10 bg-black/40 p-5 backdrop-blur-xl md:p-8">
+        <div className="rounded-xl border border-white/10 bg-panel p-5 md:p-8">
           {isLoading ? (
             <StandingsSkeleton />
           ) : error ? (

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { aboutIntro, hosts } from '../data/content';
+import { aboutIntro, hosts, socialLinks } from '../data/content';
 import { SocialIcon } from './ui/BackgroundEffects';
+import Panel from './ui/Panel';
 import Reveal from './ui/Reveal';
+import SectionAtmosphere from './ui/SectionAtmosphere';
 import SectionHeading from './ui/SectionHeading';
 
 function HostCard({ host }) {
@@ -12,24 +13,17 @@ function HostCard({ host }) {
   const hasMore = paragraphs.length > 1;
 
   return (
-    <motion.article
-      whileHover={{ y: -8 }}
-      className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl md:p-8"
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
-
+    <Panel as="article" interactive className="p-6 md:p-8">
       <div className="relative flex flex-col gap-6 md:flex-row md:items-start">
-        <div className="relative h-36 w-36 shrink-0 overflow-hidden rounded-3xl border border-yellow-400/20 bg-gradient-to-br from-zinc-800 to-black">
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(250,204,21,0.15),transparent)]" />
-          <div className="flex h-full items-center justify-center font-display text-4xl font-black text-yellow-300/70">
-            {host.badge}
-          </div>
+        {/* Driver-number plate — stands in for a host photo until we have one. */}
+        <div className="relative flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-[linear-gradient(135deg,#141417,#08080a)]">
+          <span className="font-display text-5xl font-black italic leading-none text-flag/40">{host.badge}</span>
         </div>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-yellow-300">{host.role}</p>
-          <h3 className="mt-2 font-display text-3xl font-black uppercase text-white">{host.name}</h3>
-          <div className="mt-4 space-y-3 text-base leading-7 text-zinc-300">
+          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-flag">{host.role}</p>
+          <h3 className="mt-2 font-display text-3xl font-black uppercase text-chequer">{host.name}</h3>
+          <div className="mt-4 space-y-3 text-base leading-7 text-steel">
             {visibleParagraphs.map((paragraph, paragraphIndex) => (
               <p key={paragraphIndex}>{paragraph}</p>
             ))}
@@ -39,7 +33,7 @@ function HostCard({ host }) {
             <button
               type="button"
               onClick={() => setIsExpanded((prev) => !prev)}
-              className="mt-2 inline-block cursor-pointer text-sm font-semibold text-yellow-500 transition-colors hover:text-yellow-400"
+              className="mt-2 inline-block cursor-pointer text-sm font-bold text-flag transition-colors hover:text-yellow-300"
             >
               {isExpanded ? 'Read less' : 'Read more'}
             </button>
@@ -49,8 +43,10 @@ function HostCard({ host }) {
             {host.socials.map((social) => (
               <a
                 key={social}
-                href="#"
-                className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-black/40 text-zinc-300 transition hover:border-yellow-400/40 hover:text-yellow-300"
+                href={socialLinks.find((link) => link.id === social)?.url ?? '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/10 bg-panel-2 text-steel transition hover:border-flag/50 hover:text-flag"
                 aria-label={social}
               >
                 <SocialIcon id={social} />
@@ -59,13 +55,15 @@ function HostCard({ host }) {
           </div>
         </div>
       </div>
-    </motion.article>
+    </Panel>
   );
 }
 
 export default function About() {
   return (
     <section id="about" className="relative py-24 md:py-32">
+      <SectionAtmosphere variant="apex" />
+
       <div className="mx-auto max-w-7xl px-5 md:px-8">
         <SectionHeading
           eyebrow="About"

@@ -35,6 +35,8 @@ export default function Footer() {
               <a
                 key={social.id}
                 href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 transition hover:border-yellow-400/30 hover:text-yellow-300"
                 aria-label={social.label}
               >

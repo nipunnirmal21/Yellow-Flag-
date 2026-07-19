@@ -2,11 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import About from './components/About';
 import Contact from './components/Contact';
+import Episodes from './components/episodes/Episodes';
 import F1AssistantWidget from './components/F1AssistantWidget';
 import FanZone from './components/FanZone';
 import Footer from './components/Footer';
 import Hero from './components/Hero';
-import Highlights from './components/Highlights';
 import Journey from './components/Journey';
 import Navbar from './components/Navbar';
 import RaceLights from './components/RaceLights';
@@ -71,13 +71,13 @@ export default function App() {
 
       <main>
         <Hero />
+        <Episodes />
         <About />
         <Journey />
         <Schedule />
         <Tracks />
         <Teams />
         <Standing />
-        <Highlights />
         <FanZone />
         <Contact />
       </main>

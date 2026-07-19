@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { FaPlay } from 'react-icons/fa6';
+import { FaPlay, FaYoutube } from 'react-icons/fa6';
 import { BRAND } from '../data/content';
+import { CHANNEL } from '../data/episodes';
 import { getFeaturedRace } from '../lib/raceClock';
 import NextRaceCountdown from './NextRaceCountdown';
 import GlowButton from './ui/GlowButton';
@@ -93,10 +94,15 @@ export default function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="mb-6 inline-flex items-center gap-3 rounded-full border border-yellow-400/20 bg-yellow-400/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-yellow-300"
+            className="mb-6 flex"
           >
-            <span className="h-2 w-2 animate-pulse rounded-full bg-yellow-400 shadow-[0_0_12px_rgba(250,204,21,0.8)]" />
-            Live Race Energy
+            <span className="flex items-stretch overflow-hidden rounded-sm">
+              <span className="kerb-v w-1.5" aria-hidden="true" />
+              <span className="flex items-center gap-2.5 bg-panel-2 px-3.5 py-2 text-[11px] font-black uppercase tracking-[0.3em] text-flag">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-flag" aria-hidden="true" />
+                Live Race Energy
+              </span>
+            </span>
           </motion.div>
 
           <motion.h1
@@ -112,7 +118,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="mt-5 max-w-2xl text-xl font-semibold uppercase tracking-[0.12em] text-zinc-200 md:text-2xl"
+            className="mt-5 max-w-2xl font-display text-xl font-bold text-zinc-100 md:text-2xl"
           >
             {BRAND.tagline}
           </motion.p>
@@ -132,12 +138,18 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.45 }}
             className="mt-10 flex flex-wrap gap-4"
           >
-            <GlowButton href="#highlights">
-              <FaPlay className="h-4 w-4" />
-              Watch Podcast
+            <GlowButton
+              href={CHANNEL.subscribeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="youtube"
+            >
+              <FaYoutube className="h-4 w-4" />
+              Subscribe on YouTube
             </GlowButton>
-            <GlowButton href="#highlights" variant="secondary">
-              Explore Episodes
+            <GlowButton href="#episodes" variant="secondary">
+              <FaPlay className="h-3.5 w-3.5" />
+              Latest Episodes
             </GlowButton>
           </motion.div>
         </div>

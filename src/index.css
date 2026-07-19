@@ -1,12 +1,34 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand yellow. Hotter than Tailwind's default yellow, closer to a real FIA
+     flag. Overriding the ramp itself re-tints every existing yellow-* utility
+     in one move, so components don't need to change to stay on brand. */
+  --color-yellow-200: #fff08a;
+  --color-yellow-300: #ffe14d;
+  --color-yellow-400: #ffd400;
+  --color-yellow-500: #e6b800;
+
+  /* Semantic brand tokens — prefer these in new code. */
+  --color-flag: #ffd400;
+  --color-redflag: #e10600;
+  --color-chequer: #f5f5f4;
+  --color-steel: #9ca3af;
+
+  /* Surfaces. Flat broadcast panels, not glass: solid fills, hard edges.
+     Blur is reserved for overlays that sit above content (navbar, lightbox). */
+  --color-carbon: #0a0a0b;
+  --color-panel: #101013;
+  --color-panel-2: #17171b;
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  font-family: "Rajdhani", sans-serif;
-  background: #050505;
+  font-family: "Rajdhani", "Noto Sans Sinhala", sans-serif;
+  background: #000;
   color: #fafafa;
 }
 
@@ -15,12 +37,41 @@ h2,
 h3,
 h4,
 .font-display {
-  font-family: "Exo 2", sans-serif;
+  font-family: "Exo 2", "Noto Sans Sinhala", sans-serif;
+}
+
+/* Mixed Sinhala/English text (episode titles). Never letterspace or
+   fake-uppercase Sinhala — the script has no case and tight tracking rules. */
+.font-sinhala {
+  font-family: "Noto Sans Sinhala", "Rajdhani", sans-serif;
 }
 
 ::selection {
-  background: rgba(250, 204, 21, 0.35);
+  background: rgba(255, 212, 0, 0.35);
   color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-flag);
+  outline-offset: 2px;
+}
+
+/* Kerb stripes — the track-edge motif. Used as section dividers and as the
+   hover accent on cards, replacing soft glows. */
+.kerb {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-redflag) 0 12px,
+    var(--color-chequer) 12px 24px
+  );
+}
+
+.kerb-v {
+  background-image: repeating-linear-gradient(
+    180deg,
+    var(--color-redflag) 0 14px,
+    var(--color-chequer) 14px 28px
+  );
 }
 
 @keyframes ticker-scroll {

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import { runChat } from './chat.js';
+import { getEpisodes } from './episodes.js';
 import { isGeminiConfigured, getAuthMode, CHAT_MODEL } from './gemini.js';
 import { isRagEnabled } from './rag.js';
 
@@ -15,6 +16,20 @@ app.get('/api/health', (_req, res) => {
     gemini: isGeminiConfigured(),
     rag: isRagEnabled(),
   });
+});
+
+app.get('/api/episodes', async (_req, res) => {
+  try {
+    const payload = await getEpisodes();
+    res.set('Cache-Control', 'public, max-age=900');
+    res.json(payload);
+  } catch (err) {
+    console.error('[episodes]', err);
+    res.status(502).json({
+      error: 'episodes_failed',
+      message: 'Could not load episodes from YouTube right now.',
+    });
+  }
 });
 
 app.post('/api/chat', async (req, res) => {
