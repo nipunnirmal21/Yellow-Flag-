@@ -39,12 +39,12 @@ export const hosts = [
   {
     id: 2,
     name: 'Kasun',
-    role: 'Engineering Enthusiast / Red Bull Fan',
+    role: 'Engineering Enthusiast / Ferrari Fan',
     bio: [
       "Kasun's F1 origin story is painfully unglamorous: back in 2019, he stumbled onto a race on TV completely by accident — and by the time the checkered flag dropped, he was hooked for life. No dramatic paddock moment, no childhood memory of Schumacher. Just a remote control and questionable channel-surfing that changed everything.",
       "That love only got more intense once he saw it in person — witnessing the British Grand Prix at Silverstone live left him properly fascinated by just how insanely fast these cars actually are. Onboard cameras don't even come close to doing it justice, apparently.",
       "Based in the UK, Kasun brings an engineering brain to the chaos of Formula 1 — when he's not buried in stats and lap-time deltas, he's nerding out over the actual engineering behind the cars (his studies are in engineering, so blame that for the technical tangents). But don't worry, he balances the nerdy stuff with a healthy dose of banter, hot takes on driver dramas, and the occasional unfiltered reaction to a first-lap pile-up.",
-      'A proud Red Bull Racing fan and self-appointed Max Verstappen defender-in-chief, Kasun brings equal parts stats obsession, engineering curiosity, and cheeky commentary to every episode.',
+      'A proud Ferrari fan and self-appointed Lewis Hamilton defender-in-chief, Kasun brings equal parts stats obsession, engineering curiosity, and cheeky commentary to every episode.',
     ],
     badge: 'P2',
     socials: ['youtube', 'tiktok'],

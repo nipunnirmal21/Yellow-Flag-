@@ -47,14 +47,14 @@ export default function Schedule() {
             const isSprintWeekend = Boolean(race.sprintDetails);
 
             return (
-              <Reveal key={race.round} delay={index * 0.06}>
+              <Reveal key={race.round} delay={index * 0.06} className="h-full">
                 <motion.article
                   initial={{ opacity: 0, y: 28 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{ duration: 0.55, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
                   whileHover={{ y: -8, scale: 1.015 }}
-                  className="group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.045] p-6 backdrop-blur-xl transition hover:border-yellow-400/40 hover:shadow-[0_0_42px_rgba(250,204,21,0.16)]"
+                  className="group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.045] p-6 backdrop-blur-xl transition hover:border-yellow-400/40 hover:shadow-[0_0_42px_rgba(250,204,21,0.16)]"
                 >
                   <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(250,204,21,0.08),transparent_34%,transparent_60%,rgba(250,204,21,0.05))]" />
                   <div className="pointer-events-none absolute -right-14 top-10 h-28 w-28 rounded-full bg-yellow-400/10 blur-3xl transition duration-500 group-hover:bg-yellow-400/20" />
@@ -115,7 +115,7 @@ export default function Schedule() {
                     </div>
                   )}
 
-                  <div className="relative mt-6">
+                  <div className="relative mt-auto pt-6">
                     <ViewTrackButton href={viewTrackHref(race.trackSlug)} />
                   </div>
                 </motion.article>
