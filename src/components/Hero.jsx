@@ -1,7 +1,36 @@
+import { useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { FaPlay } from 'react-icons/fa6';
 import { BRAND } from '../data/content';
 import GlowButton from './ui/GlowButton';
+
+/**
+ * Full-bleed background video. Sits behind the centered hero content. If
+ * public/hero-bg.mp4 fails to load, this removes itself and the gradient
+ * background shows instead.
+ */
+function HeroVideo() {
+  const [available, setAvailable] = useState(true);
+  if (!available) return null;
+
+  return (
+    <div className="absolute inset-0" aria-hidden="true">
+      <video
+        className="h-full w-full object-cover"
+        src="/hero-bg.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        onError={() => setAvailable(false)}
+      />
+      {/* Dark washes keep the centered headline readable over motion. */}
+      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
+    </div>
+  );
+}
 
 export default function Hero() {
   const { scrollY } = useScroll();
@@ -10,6 +39,7 @@ export default function Hero() {
 
   return (
     <section id="home" className="relative flex min-h-screen items-center overflow-hidden pt-28">
+      <HeroVideo />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(250,204,21,0.12),transparent_28%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.05),transparent_24%)]" />
 
       <motion.div style={{ y, opacity }} className="absolute inset-0">
