@@ -7,9 +7,11 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-5 md:grid-cols-[1.2fr_0.8fr_0.8fr] md:px-8">
         <div>
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-yellow-400/30 bg-yellow-400/10 font-display text-sm font-black text-yellow-300">
-              YF
-            </span>
+            <img
+              src="/logo.jpeg"
+              alt="Yellow Flag logo"
+              className="h-10 w-10 rounded-xl border border-yellow-400/30 object-cover"
+            />
             <span className="font-display text-xl font-black uppercase tracking-[0.18em] text-white">{BRAND.name}</span>
           </div>
           <p className="mt-4 max-w-md text-base leading-7 text-zinc-300">{BRAND.footerTagline}</p>

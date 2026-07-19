@@ -63,9 +63,11 @@ export default function Navbar({ activeSection }) {
           onClick={() => handleNav('home')}
           className="group flex items-center gap-3 text-left"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-yellow-400/30 bg-yellow-400/10 font-display text-sm font-black text-yellow-300 shadow-[0_0_24px_rgba(250,204,21,0.2)]">
-            YF
-          </span>
+          <img
+            src="/logo.jpeg"
+            alt="Yellow Flag logo"
+            className="h-10 w-10 rounded-xl border border-yellow-400/30 object-cover shadow-[0_0_24px_rgba(250,204,21,0.2)]"
+          />
           <span>
             <span className="block font-display text-lg font-black uppercase tracking-[0.18em] text-white transition group-hover:text-yellow-300">
               {BRAND.name}
