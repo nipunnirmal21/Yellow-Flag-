@@ -8,13 +8,13 @@ export const BRAND = {
 
 export const navItems = [
   { id: 'home', label: 'Home' },
+  { id: 'episodes', label: 'Episodes' },
   { id: 'about', label: 'About' },
   { id: 'schedule', label: 'Schedule' },
   { id: 'tracks', label: 'Tracks' },
   { id: 'teams', label: 'Teams' },
   { id: 'drivers', label: 'Drivers', path: '/drivers' },
   { id: 'standing', label: 'Standing' },
-  { id: 'highlights', label: 'Highlights' },
   { id: 'game', label: 'Game' },
   { id: 'contact', label: 'Contact' },
 ];

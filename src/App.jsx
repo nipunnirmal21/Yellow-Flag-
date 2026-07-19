@@ -9,7 +9,6 @@ import FanZone from './components/FanZone';
 import Footer from './components/Footer';
 import Game from './components/Game';
 import Hero from './components/Hero';
-import Highlights from './components/Highlights';
 import Journey from './components/Journey';
 import Navbar from './components/Navbar';
 import Schedule from './components/Schedule';
@@ -69,7 +68,6 @@ function HomePage() {
         <Tracks />
         <Teams />
         <Standing />
-        <Highlights />
         <Game />
         <FanZone />
         <Contact />

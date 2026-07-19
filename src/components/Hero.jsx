@@ -117,11 +117,11 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.45 }}
             className="mt-10 flex flex-wrap justify-center gap-4"
           >
-            <GlowButton href="#highlights">
+            <GlowButton href="#episodes">
               <FaPlay className="h-4 w-4" />
               Watch Podcast
             </GlowButton>
-            <GlowButton href="#highlights" variant="secondary">
+            <GlowButton href="#episodes" variant="secondary">
               Explore Episodes
             </GlowButton>
           </motion.div>

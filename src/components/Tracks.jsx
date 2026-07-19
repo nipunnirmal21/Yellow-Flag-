@@ -149,7 +149,7 @@ function TrackCard({ track, index, onSelect }) {
 
         <div className="border-t border-white/5 bg-[#111111] p-4 md:p-5">
           <a
-            href="#highlights"
+            href="#episodes"
             onClick={(e) => e.stopPropagation()}
             className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-[#1a1a1a] px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition hover:border-yellow-400/35 hover:text-yellow-200"
           >
