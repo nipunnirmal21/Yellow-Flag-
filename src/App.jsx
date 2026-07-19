@@ -5,7 +5,6 @@ import Contact from './components/Contact';
 import Drivers from './components/Drivers';
 import Episodes from './components/episodes/Episodes';
 import F1AssistantWidget from './components/F1AssistantWidget';
-import FanZone from './components/FanZone';
 import Footer from './components/Footer';
 import Game from './components/Game';
 import Hero from './components/Hero';
@@ -69,7 +68,6 @@ function HomePage() {
         <Teams />
         <Standing />
         <Game />
-        <FanZone />
         <Contact />
       </main>
       <Footer />
