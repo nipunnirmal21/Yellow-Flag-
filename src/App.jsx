@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import About from './components/About';
 import Contact from './components/Contact';
 import Drivers from './components/Drivers';
+import Episodes from './components/episodes/Episodes';
 import F1AssistantWidget from './components/F1AssistantWidget';
 import FanZone from './components/FanZone';
 import Footer from './components/Footer';
@@ -61,6 +62,7 @@ function HomePage() {
       <Navbar activeSection={activeSection} />
       <main>
         <Hero />
+        <Episodes />
         <About />
         <Journey />
         <Schedule />
