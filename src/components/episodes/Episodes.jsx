@@ -10,7 +10,7 @@ import CategoryChips from './CategoryChips';
 import EpisodeCard from './EpisodeCard';
 import EpisodeLightbox from './EpisodeLightbox';
 
-const COLLAPSED_COUNT = 6;
+const COLLAPSED_COUNT = 8;
 
 export default function Episodes() {
   const { episodes } = useEpisodes();
