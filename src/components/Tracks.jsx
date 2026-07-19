@@ -6,36 +6,38 @@ import ExpandableGrid from './ui/ExpandableGrid';
 import Reveal from './ui/Reveal';
 import SectionHeading from './ui/SectionHeading';
 
+/**
+ * Track outline confined to a stage on the right of the card, so it never
+ * crosses the title or the round pill. Fills its parent box via object-contain
+ * for a consistent size across circuits, with a soft yellow glow.
+ */
 function TrackOutline({ track }) {
   const [failed, setFailed] = useState(false);
   const shouldInvert = Boolean(track.invertLayout);
 
-  if (!track.layoutUrl || failed) {
-    return (
-      <div
-        className="pointer-events-none absolute -right-6 top-8 h-44 w-56 rounded-full bg-[radial-gradient(circle,rgba(250,204,21,0.08),transparent_70%)] opacity-60 md:h-52 md:w-64"
-        aria-hidden="true"
-      />
-    );
-  }
-
   return (
-    <motion.img
-      src={track.layoutUrl}
-      alt=""
+    <div
+      className="pointer-events-none absolute inset-y-0 right-0 w-[48%] overflow-hidden"
       aria-hidden="true"
-      loading="lazy"
-      referrerPolicy="no-referrer"
-      className="pointer-events-none absolute -right-4 top-2 h-[70%] w-[72%] object-contain opacity-80 drop-shadow-[0_0_15px_rgba(255,255,255,0.15)] md:-right-2 md:top-4 md:h-[75%] md:w-[70%]"
-      style={{
-        filter: shouldInvert
-          ? 'invert(1) drop-shadow(0 0 12px rgba(250,204,21,0.35)) drop-shadow(0 0 28px rgba(250,204,21,0.18))'
-          : 'drop-shadow(0 0 12px rgba(250,204,21,0.35)) drop-shadow(0 0 28px rgba(250,204,21,0.18))',
-      }}
-      whileHover={{ scale: 1.04, opacity: 0.95 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      onError={() => setFailed(true)}
-    />
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_50%,rgba(250,204,21,0.12),transparent_68%)]" />
+
+      {track.layoutUrl && !failed && (
+        <motion.img
+          src={track.layoutUrl}
+          alt=""
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          className="absolute inset-0 m-auto h-[72%] w-[82%] object-contain opacity-75"
+          style={{
+            filter: `${shouldInvert ? 'invert(1) ' : ''}drop-shadow(0 0 10px rgba(250,204,21,0.4)) drop-shadow(0 0 24px rgba(250,204,21,0.16))`,
+          }}
+          whileHover={{ scale: 1.05, opacity: 0.95 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          onError={() => setFailed(true)}
+        />
+      )}
+    </div>
   );
 }
 
@@ -127,16 +129,16 @@ function TrackCard({ track, index, onSelect }) {
         id={`track-${track.id}`}
         whileHover={{ y: -6 }}
         onClick={() => onSelect(track)}
-        className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0a0a0a] transition hover:border-yellow-400/30 hover:shadow-[0_0_36px_rgba(250,204,21,0.12)]"
+        className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-[#151515] to-[#0a0a0a] transition hover:border-yellow-400/30 hover:shadow-[0_0_36px_rgba(250,204,21,0.12)]"
       >
-        <div className="relative min-h-[220px] flex-1 overflow-hidden px-5 pb-6 pt-5 md:min-h-[240px] md:px-6 md:pt-6">
+        <div className="relative flex min-h-[220px] flex-1 flex-col overflow-hidden p-5 md:min-h-[240px] md:p-6">
           <TrackOutline track={track} />
 
-          <span className="relative z-10 inline-flex rounded-full border border-yellow-400/40 bg-black px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-yellow-300">
+          <span className="relative z-10 inline-flex w-fit rounded-full border border-yellow-400/40 bg-black/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-yellow-300 backdrop-blur-sm">
             Round {String(track.id).padStart(2, '0')}
           </span>
 
-          <div className="relative z-10 mt-10 max-w-[85%] md:mt-14 md:max-w-[70%]">
+          <div className="relative z-10 mt-auto max-w-[52%] pt-8">
             <h3 className="font-display text-xl font-extrabold uppercase leading-tight tracking-wide text-white md:text-2xl">
               {track.name}
             </h3>
