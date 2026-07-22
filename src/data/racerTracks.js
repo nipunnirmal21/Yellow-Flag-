@@ -17,6 +17,54 @@ const APEX_GAIN = 16;
 const SLOW_GAIN = 0.5;
 const MIN_SPEED_FACTOR = 0.55;
 
+// ── Albert Park (Australia) manual racing-line waypoints ────────────────────
+// Defined in SVG path-space (viewBox 0 0 800 600). getTrackGeometry() applies
+// the same fitTransform used for pts/racingLine, so the points snap exactly
+// onto the rendered tarmac regardless of canvas DPI or margin changes.
+// 48 points tracing the 2022-present 14-turn layout (clockwise, pit-straight
+// is index 0, same winding as the SVG path).
+const AUSTRALIA_WAYPOINTS_SVG = [
+  // ── Pit straight (east / left→right at top of canvas) ──────────────────
+  { x: 390, y: 95 },  { x: 450, y: 90 },  { x: 510, y: 92 },
+  // ── T1 (sharp right-hander) ─────────────────────────────────────────────
+  { x: 548, y: 104 }, { x: 548, y: 132 },
+  // ── T2 (left) ───────────────────────────────────────────────────────────
+  { x: 520, y: 158 }, { x: 495, y: 174 },
+  // ── T3-T4 (right-left complex) ──────────────────────────────────────────
+  { x: 452, y: 192 }, { x: 448, y: 220 }, { x: 462, y: 246 },
+  // ── T5-T6 high-speed kink (chicane removed 2022) ────────────────────────
+  { x: 490, y: 256 }, { x: 538, y: 244 }, { x: 570, y: 226 },
+  // ── T7 (right-hander) ───────────────────────────────────────────────────
+  { x: 606, y: 218 }, { x: 628, y: 236 }, { x: 626, y: 268 },
+  // ── T8 right hairpin (slowest corner) ───────────────────────────────────
+  { x: 614, y: 290 }, { x: 598, y: 338 },
+  // ── Back straight (heading south-east) ──────────────────────────────────
+  { x: 602, y: 368 }, { x: 608, y: 402 },
+  // ── T9 (right) ──────────────────────────────────────────────────────────
+  { x: 594, y: 432 }, { x: 568, y: 450 },
+  // ── T10 (right, lake section) ───────────────────────────────────────────
+  { x: 508, y: 452 }, { x: 484, y: 432 },
+  // ── T11 (left) ──────────────────────────────────────────────────────────
+  { x: 432, y: 442 }, { x: 412, y: 460 },
+  // ── T12 hairpin ─────────────────────────────────────────────────────────
+  { x: 393, y: 500 }, { x: 388, y: 528 }, { x: 372, y: 556 },
+  // ── T13 (left exit) ─────────────────────────────────────────────────────
+  { x: 348, y: 562 }, { x: 318, y: 532 },
+  // ── West loop approach ──────────────────────────────────────────────────
+  { x: 316, y: 504 }, { x: 286, y: 460 }, { x: 258, y: 456 },
+  // ── T14 (left-hander) ───────────────────────────────────────────────────
+  { x: 220, y: 412 }, { x: 218, y: 378 }, { x: 242, y: 348 },
+  // ── Inner northwest section ──────────────────────────────────────────────
+  { x: 262, y: 332 }, { x: 282, y: 320 },
+  { x: 292, y: 278 }, { x: 280, y: 254 },
+  // ── North approach ──────────────────────────────────────────────────────
+  { x: 238, y: 218 }, { x: 213, y: 215 }, { x: 180, y: 182 },
+  // ── North hairpin ────────────────────────────────────────────────────────
+  { x: 176, y: 158 }, { x: 202, y: 114 }, { x: 228, y: 108 },
+  // ── Pit straight entry ───────────────────────────────────────────────────
+  { x: 280, y: 118 }, { x: 348, y: 102 }, { x: 380, y: 92 },
+];
+
 const svgSources = import.meta.glob('../assets/tracks/*.svg', {
   eager: true,
   query: '?raw',
@@ -340,5 +388,17 @@ export function getTrackGeometry(track) {
     path.addPath(new Path2D(base.d), new DOMMatrix([scale, 0, 0, scale, tx, ty]));
     path2dCache.set(track.id, path);
   }
-  return { ...base, path2d: path2dCache.get(track.id) };
+
+  // For Australia, expose the hand-placed racing-line waypoints in canvas
+  // space. The same scale/tx/ty as pts ensures they align with the tarmac.
+  let waypoints = null;
+  if (track.id === 'australia') {
+    const { scale, tx, ty } = base.transform;
+    waypoints = AUSTRALIA_WAYPOINTS_SVG.map(({ x, y }) => ({
+      x: x * scale + tx,
+      y: y * scale + ty,
+    }));
+  }
+
+  return { ...base, path2d: path2dCache.get(track.id), waypoints };
 }
