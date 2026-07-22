@@ -906,16 +906,35 @@ function ChampionshipCalendar({ unlocked, results, onPick, onExit, onReset }) {
                 {!isUnlocked && <Lock className="h-3.5 w-3.5 text-zinc-600" />}
               </div>
 
-              <img
-                src={TRACK_SVGS[track.id]}
-                alt=""
-                aria-hidden="true"
-                className={`w-full rounded-lg object-contain transition duration-300 ${
-                  isUnlocked
-                    ? 'opacity-90 group-hover:opacity-100 group-hover:brightness-110'
-                    : 'opacity-40 grayscale'
-                }`}
-              />
+              {track.id === 'australia' ? (
+                <svg
+                  viewBox="-6 -6 237 267"
+                  className={`w-full h-32 rounded-lg object-contain transition duration-300 ${
+                    isUnlocked
+                      ? 'opacity-90 group-hover:opacity-100 group-hover:brightness-110'
+                      : 'opacity-40 grayscale'
+                  }`}
+                  fill="none"
+                >
+                  <path
+                    d="M 209 235 C 207 225, 205 214, 202 203 L 198 190 C 195 180, 188 174, 179 168 L 165 158 C 159 154, 153 157, 147 155 C 133 150, 121 139, 115 128 C 109 117, 109 105, 112 92 L 116 76 C 118 68, 125 64, 127 57 C 130 48, 127 35, 124 27 C 121 19, 115 14, 107 12 C 99 9, 91 12, 82 5 C 78 2, 75 2, 71 5 C 64 10, 54 13, 45 17 C 38 20, 32 24, 29 29 L 30 61 C 23 62, 14 63, 10 66 C 15 80, 25 95, 36 106 L 55 124 C 62 131, 63 138, 58 149 C 57 153, 60 157, 64 161 L 130 226 C 136 232, 141 233, 146 229 L 154 219 C 157 215, 159 215, 162 220 L 174 242 C 177 247, 180 248, 186 246 L 209 238 Z"
+                    stroke="#FACC15"
+                    strokeWidth="3"
+                    fill="rgba(250,204,21,0.08)"
+                  />
+                </svg>
+              ) : (
+                <img
+                  src={TRACK_SVGS[track.id]}
+                  alt=""
+                  aria-hidden="true"
+                  className={`w-full rounded-lg object-contain transition duration-300 ${
+                    isUnlocked
+                      ? 'opacity-90 group-hover:opacity-100 group-hover:brightness-110'
+                      : 'opacity-40 grayscale'
+                  }`}
+                />
+              )}
 
               <div>
                 <h4

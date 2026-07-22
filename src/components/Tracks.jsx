@@ -10,6 +10,23 @@ function TrackOutline({ track }) {
   const [failed, setFailed] = useState(false);
   const shouldInvert = Boolean(track.invertLayout);
 
+  if (track.layoutPath) {
+    return (
+      <svg
+        viewBox={track.viewBox || "-6 -6 237 267"}
+        className="pointer-events-none absolute -right-4 top-2 h-[70%] w-[72%] opacity-80 drop-shadow-[0_0_15px_rgba(255,255,255,0.15)] md:-right-2 md:top-4 md:h-[75%] md:w-[70%]"
+        style={{
+          filter: shouldInvert
+            ? 'invert(1) drop-shadow(0 0 12px rgba(250,204,21,0.35)) drop-shadow(0 0 28px rgba(250,204,21,0.18))'
+            : 'drop-shadow(0 0 12px rgba(250,204,21,0.35)) drop-shadow(0 0 28px rgba(250,204,21,0.18))',
+        }}
+        fill="none"
+      >
+        <path d={track.layoutPath} stroke="#FACC15" strokeWidth="3" fill="rgba(250,204,21,0.08)" />
+      </svg>
+    );
+  }
+
   if (!track.layoutUrl || failed) {
     return (
       <div
@@ -79,7 +96,19 @@ function TrackModal({ track, onClose }) {
         </button>
 
         {/* Track layout */}
-        {track.layoutUrl && (
+        {track.layoutPath ? (
+          <div className="flex items-center justify-center pb-2 pt-4">
+            <svg
+              viewBox={track.viewBox || "-6 -6 237 267"}
+              className={`h-44 w-full max-w-md drop-shadow-[0_0_18px_rgba(250,204,21,0.25)] md:h-52 ${
+                shouldInvert ? 'invert brightness-200' : 'brightness-200'
+              }`}
+              fill="none"
+            >
+              <path d={track.layoutPath} stroke="#FACC15" strokeWidth="3" fill="rgba(250,204,21,0.08)" />
+            </svg>
+          </div>
+        ) : track.layoutUrl ? (
           <div className="flex items-center justify-center pb-2 pt-4">
             <img
               src={track.layoutUrl}
@@ -91,7 +120,7 @@ function TrackModal({ track, onClose }) {
               }`}
             />
           </div>
-        )}
+        ) : null}
 
         {/* Header */}
         <div className="mt-4 text-center">
