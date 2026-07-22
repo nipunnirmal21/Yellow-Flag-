@@ -136,13 +136,15 @@ function TrackModal({ track, onClose }) {
         <p className="mt-6 text-sm leading-7 text-gray-300 md:text-base">{track.description}</p>
 
         {/* Stats grid */}
-        <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-3">
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
           <TrackStat label="Country" value={track.country} />
           <TrackStat label="Track Length" value={track.trackLength} />
           <TrackStat label="Laps" value={track.laps} />
+          <TrackStat label="Corners" value={track.corners} />
           <TrackStat label="Race Distance" value={track.raceDistance} />
           <TrackStat label="Track Type" value={track.trackType} />
           <TrackStat label="Time of Day" value={track.timeOfDay} />
+          <TrackStat label="Lap Record" value={track.lapRecord} />
         </div>
       </motion.div>
     </motion.div>

@@ -327,11 +327,27 @@ const CALENDAR = [
   { id: 'australia', name: 'Australia', circuit: 'Albert Park' },
   { id: 'china', name: 'China', circuit: 'Shanghai' },
   { id: 'japan', name: 'Japan', circuit: 'Suzuka' },
+  { id: 'bahrain', name: 'Bahrain', circuit: 'Bahrain International Circuit' },
+  { id: 'saudi-arabia', name: 'Saudi Arabia', circuit: 'Jeddah Corniche Circuit' },
+  { id: 'miami', name: 'Miami', circuit: 'Miami International Autodrome' },
+  { id: 'imola', name: 'Emilia Romagna', circuit: 'Imola' },
   { id: 'monaco', name: 'Monaco', circuit: 'Monte Carlo' },
+  { id: 'spain', name: 'Spain', circuit: 'IFEMA Madrid' },
+  { id: 'canada', name: 'Canada', circuit: 'Circuit Gilles Villeneuve' },
+  { id: 'austria', name: 'Austria', circuit: 'Red Bull Ring' },
   { id: 'silverstone', name: 'Great Britain', circuit: 'Silverstone' },
+  { id: 'belgium', name: 'Belgium', circuit: 'Spa-Francorchamps' },
+  { id: 'hungary', name: 'Hungary', circuit: 'Hungaroring' },
+  { id: 'netherlands', name: 'Netherlands', circuit: 'Circuit Zandvoort' },
   { id: 'monza', name: 'Italy', circuit: 'Monza' },
+  { id: 'baku', name: 'Azerbaijan', circuit: 'Baku City Circuit' },
   { id: 'singapore', name: 'Singapore', circuit: 'Marina Bay' },
-  { id: 'abu-dhabi', name: 'Abu Dhabi', circuit: 'Yas Marina' },
+  { id: 'austin', name: 'United States', circuit: 'Circuit of The Americas' },
+  { id: 'mexico', name: 'Mexico', circuit: 'Autodromo Hermanos Rodriguez' },
+  { id: 'brazil', name: 'Brazil', circuit: 'Interlagos' },
+  { id: 'las-vegas', name: 'Las Vegas', circuit: 'Las Vegas Strip Circuit' },
+  { id: 'qatar', name: 'Qatar', circuit: 'Lusail' },
+  { id: 'abu-dhabi', name: 'Abu Dhabi', circuit: 'Yas Marina' }
 ];
 
 const TRACK_WIDTHS = {
