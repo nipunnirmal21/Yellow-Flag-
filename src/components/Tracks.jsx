@@ -25,14 +25,22 @@ function TrackOutline({ track }) {
       {track.layoutPath && (
         <svg
           viewBox={track.viewBox || '-6 -6 237 267'}
-          className="absolute inset-0 m-auto h-[72%] w-[82%] opacity-75"
+          className="absolute inset-0 m-auto h-[70%] w-[80%] opacity-80"
           style={{
-            filter: `${shouldInvert ? 'invert(1) ' : ''}drop-shadow(0 0 10px rgba(250,204,21,0.4)) drop-shadow(0 0 24px rgba(250,204,21,0.16))`,
+            filter: `${shouldInvert ? 'invert(1) ' : ''}drop-shadow(0 0 7px rgba(250,204,21,0.3)) drop-shadow(0 0 18px rgba(250,204,21,0.12))`,
           }}
           fill="none"
           aria-hidden="true"
         >
-          <path d={track.layoutPath} stroke="#FACC15" strokeWidth="3" fill="rgba(250,204,21,0.08)" />
+          <path
+            d={track.layoutPath}
+            stroke="#FACC15"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+            fill="none"
+          />
         </svg>
       )}
 
@@ -42,11 +50,11 @@ function TrackOutline({ track }) {
           alt=""
           loading="lazy"
           referrerPolicy="no-referrer"
-          className="absolute inset-0 m-auto h-[72%] w-[82%] object-contain opacity-75"
+          className="absolute inset-0 m-auto h-[64%] w-[74%] object-contain opacity-55"
           style={{
-            filter: `${shouldInvert ? 'invert(1) ' : ''}drop-shadow(0 0 10px rgba(250,204,21,0.4)) drop-shadow(0 0 24px rgba(250,204,21,0.16))`,
+            filter: `${shouldInvert ? 'invert(1) ' : ''}drop-shadow(0 0 6px rgba(250,204,21,0.28)) drop-shadow(0 0 16px rgba(250,204,21,0.1))`,
           }}
-          whileHover={{ scale: 1.05, opacity: 0.95 }}
+          whileHover={{ scale: 1.04, opacity: 0.85 }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           onError={() => setFailed(true)}
         />
@@ -104,7 +112,15 @@ function TrackModal({ track, onClose }) {
               }`}
               fill="none"
             >
-              <path d={track.layoutPath} stroke="#FACC15" strokeWidth="3" fill="rgba(250,204,21,0.08)" />
+              <path
+                d={track.layoutPath}
+                stroke="#FACC15"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+                fill="none"
+              />
             </svg>
           </div>
         ) : track.layoutUrl ? (
@@ -211,27 +227,6 @@ export default function Tracks() {
 
   return (
     <section id="tracks" className="relative py-24 md:py-32">
-      <svg
-        className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.07]"
-        viewBox="0 0 1440 800"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <path
-          d="M0 400 C 200 300, 400 500, 600 400 S 1000 200, 1440 350"
-          fill="none"
-          stroke="rgba(250,204,21,0.8)"
-          strokeWidth="2"
-          strokeDasharray="12 16"
-        />
-        <path
-          d="M0 520 C 240 420, 480 620, 720 500 S 1200 320, 1440 470"
-          fill="none"
-          stroke="rgba(255,255,255,0.5)"
-          strokeWidth="1"
-        />
-      </svg>
-
       <div className="relative mx-auto max-w-7xl px-5 md:px-8">
         <SectionHeading eyebrow="Tracks" title="F1 Tracks" description={tracksIntro} />
 

@@ -373,15 +373,6 @@ export default function Standing() {
   return (
     <section id="standing" className="relative py-24 md:py-32">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(220,38,38,0.08),transparent_35%),radial-gradient(circle_at_30%_20%,rgba(250,204,21,0.05),transparent_40%)]" />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            'linear-gradient(45deg, #fff 25%, transparent 25%, transparent 75%, #fff 75%), linear-gradient(45deg, #fff 25%, transparent 25%, transparent 75%, #fff 75%)',
-          backgroundSize: '24px 24px',
-          backgroundPosition: '0 0, 12px 12px',
-        }}
-      />
 
       <div className="relative mx-auto max-w-5xl px-5 md:px-8">
         <Reveal>

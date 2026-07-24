@@ -18,7 +18,7 @@ html {
 }
 
 body {
-  font-family: "Rajdhani", "Noto Sans Sinhala", sans-serif;
+  font-family: "Titillium Web", "Noto Sans Sinhala", sans-serif;
   background: #050505;
   color: #fafafa;
 }
@@ -28,13 +28,13 @@ h2,
 h3,
 h4,
 .font-display {
-  font-family: "Exo 2", "Noto Sans Sinhala", sans-serif;
+  font-family: "Titillium Web", "Noto Sans Sinhala", sans-serif;
 }
 
 /* Mixed Sinhala/English text (episode titles). Never letterspace or
    fake-uppercase Sinhala — the script has no case and tight tracking rules. */
 .font-sinhala {
-  font-family: "Noto Sans Sinhala", "Rajdhani", sans-serif;
+  font-family: "Noto Sans Sinhala", "Titillium Web", sans-serif;
 }
 
 ::selection {

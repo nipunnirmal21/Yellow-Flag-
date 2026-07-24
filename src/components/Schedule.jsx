@@ -29,11 +29,7 @@ export default function Schedule() {
   return (
     <section id="schedule" className="relative py-24 md:py-32">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(250,204,21,0.08),transparent_42%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-50 [background-image:linear-gradient(rgba(250,204,21,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(250,204,21,0.05)_1px,transparent_1px)] [background-size:72px_72px]" />
-      <div className="pointer-events-none absolute inset-x-0 top-24 h-px bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent" />
       <div className="pointer-events-none absolute inset-x-10 bottom-20 h-24 rounded-full bg-yellow-400/10 blur-3xl" />
-      <div className="pointer-events-none absolute left-0 top-1/3 h-px w-40 -rotate-6 bg-gradient-to-r from-transparent via-yellow-300/35 to-transparent" />
-      <div className="pointer-events-none absolute right-0 top-2/3 h-px w-48 rotate-3 bg-gradient-to-l from-transparent via-yellow-300/30 to-transparent" />
 
       <div className="relative mx-auto max-w-7xl px-5 md:px-8">
         <SectionHeading
