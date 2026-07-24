@@ -362,6 +362,7 @@ const TRACK_WIDTHS = {
   monza: 58,
   baku: 54,
   cota: 60, // Fast flowing modern circuit
+  mexico: 58,
 };
 
 const COLLISION_WIDTHS = {
@@ -375,6 +376,7 @@ const COLLISION_WIDTHS = {
   monza: 68,
   baku: 66,
   cota: 72, // Generous runoff
+  mexico: 70,
 };
 
 const VISUAL_ROAD_WIDTHS = {
@@ -388,6 +390,7 @@ const VISUAL_ROAD_WIDTHS = {
   monza: 58,
   baku: 54,
   cota: 60,
+  mexico: 58,
 };
 
 const BORDER_WIDTHS = {
@@ -401,6 +404,7 @@ const BORDER_WIDTHS = {
   monza: 68,
   baku: 64,
   cota: 70,
+  mexico: 68,
 };
 
 const KERB_WIDTHS = {
@@ -414,6 +418,7 @@ const KERB_WIDTHS = {
   monza: 68,
   baku: 64,
   cota: 70,
+  mexico: 68,
 };
 
 // Pure-math geometry (no DOM APIs), computed once per track at module load.
