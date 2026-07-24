@@ -81,6 +81,31 @@ function nearestSegment(pts, x, y, centerIdx, windowSize) {
   return best;
 }
 
+// Finds the shortest perpendicular distance from point (px,py) to the closed
+// polyline defined by `wps`. Used for the Albert Park off-track penalty.
+function nearestDistToPolyline(px, py, wps) {
+  let minDist = Infinity;
+  const n = wps.length;
+  for (let i = 0; i < n; i++) {
+    const a = wps[i];
+    const b = wps[(i + 1) % n];
+    const d = nearestOnSegment(px, py, a.x, a.y, b.x, b.y).dist;
+    if (d < minDist) minDist = d;
+  }
+  return minDist;
+}
+
+// Returns the index of the waypoint in `wps` closest to (x, y).
+function nearestWpIdx(x, y, wps) {
+  let best = 0;
+  let bestDist = Infinity;
+  for (let i = 0; i < wps.length; i++) {
+    const d = Math.hypot(wps[i].x - x, wps[i].y - y);
+    if (d < bestDist) { bestDist = d; best = i; }
+  }
+  return best;
+}
+
 // The static track ribbon is rendered once to an offscreen canvas; the race
 // loop only blits it, keeping per-frame work to car sprites alone. The ribbon
 // is stroked directly from the authentic SVG Path2D, so the visible tarmac is
@@ -306,7 +331,7 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
   // Game engine: init cars, run simulation + render loop.
   useEffect(() => {
     const geometry = getTrackGeometry(track);
-    const { pts, n, racingLine, speedFactor, path2d } = geometry;
+    const { pts, n, racingLine, speedFactor, path2d, waypoints } = geometry;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const canvas = canvasRef.current;
@@ -347,10 +372,12 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
       const heading = Math.atan2(q.y - p.y, q.x - p.x);
       const side = i % 2 === 0 ? -1 : 1;
       const lateral = side * track.width * 0.2;
+      const startX = p.x + Math.cos(heading + Math.PI / 2) * lateral;
+      const startY = p.y + Math.sin(heading + Math.PI / 2) * lateral;
       return {
         ...spec,
-        x: p.x + Math.cos(heading + Math.PI / 2) * lateral,
-        y: p.y + Math.sin(heading + Math.PI / 2) * lateral,
+        x: startX,
+        y: startY,
         heading,
         speed: 0,
         segIdx: idx,
@@ -359,6 +386,8 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
         offTrack: false,
         finished: false,
         finishOrder: 0,
+        // Waypoint index for the Albert Park AI path (null on other tracks).
+        wpIdx: waypoints && !spec.isPlayer ? nearestWpIdx(startX, startY, waypoints) : 0,
       };
     });
 
@@ -402,12 +431,19 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
 
     const updateProgress = (car) => {
       const near = nearestSegment(pts, car.x, car.y, car.segIdx, 15);
-      // Boundary check against the authentic SVG path: leaving the stroked
-      // ribbon costs the player a one-time 45% speed cut (roughly 1-2
-      // positions, still recoverable); continued scraping only scrubs
-      // lightly. A hard clamp then pulls the car back onto the surface so it
-      // can never escape the circuit.
-      const outside = !isOnTrack(car.x, car.y);
+      // Boundary check — two modes depending on the track:
+      //
+      // Albert Park (waypoints defined): the player's distance from the
+      // waypoint polyline (i.e., the racing centerline) must stay within
+      // half the track width + a small grace buffer (40 px). Breaching that
+      // fires the 45% one-time speed cut. AI cars use their own boundary
+      // management via the existing maxOffset clamp.
+      //
+      // All other tracks: the original SVG stroke hit-test + maxOffset clamp.
+      const outside = waypoints
+        ? car.isPlayer && nearestDistToPolyline(car.x, car.y, waypoints) > 40
+        : !isOnTrack(car.x, car.y);
+
       if (outside || near.dist > maxOffset) {
         if (near.dist > maxOffset) {
           const nx = (car.x - near.qx) / (near.dist || 1);
@@ -419,7 +455,7 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
           car.speed *= 0.9;
         } else if (!car.offTrack) {
           car.offTrack = true;
-          car.speed *= 0.55;
+          car.speed *= 0.55;   // ← 45% speed penalty on first frame off-track
         } else {
           car.speed *= 0.995;
         }
@@ -476,35 +512,71 @@ function RaceScreen({ track, isLastTrack, onFinish, onRetry, onNextRace, onBackT
           car.speed *= Math.pow(0.988, dt);
           if (Math.abs(car.speed) < 0.02 && !keys.up && !keys.down) car.speed = 0;
         } else {
-          // AI: chase a look-ahead point on the apex-hugging racing line
-          // derived from the real circuit shape. A small per-car lateral
-          // offset stops the pack forming a perfect train without pulling
-          // anyone meaningfully off the ideal line.
-          const lookIdx = (car.segIdx + 5) % n;
-          const lp = racingLine[lookIdx];
-          const lq = racingLine[(lookIdx + 1) % n];
-          const tangent = Math.atan2(lq.y - lp.y, lq.x - lp.x);
-          const tx = lp.x + Math.cos(tangent + Math.PI / 2) * car.lineOffset;
-          const ty = lp.y + Math.sin(tangent + Math.PI / 2) * car.lineOffset;
-          const diff = normalizeAngle(Math.atan2(ty - car.y, tx - car.x) - car.heading);
-          car.heading += clamp(diff, -car.turnClamp * dt, car.turnClamp * dt);
+          // AI steering — two modes:
+          //
+          // Albert Park (waypoints defined): chase the explicit waypoint
+          // array. Capture within 20 px advances to the next point. A
+          // 3-step look-ahead keeps steering smooth through high-speed
+          // sections. Speed control still uses speedFactor via segIdx so the
+          // AI brakes correctly for every corner apex.
+          //
+          // All other tracks: classic look-ahead on the computed racingLine.
+          if (waypoints) {
+            // Advance waypoint index when car enters capture radius.
+            const wp = waypoints[car.wpIdx];
+            if (Math.hypot(wp.x - car.x, wp.y - car.y) < 20) {
+              car.wpIdx = (car.wpIdx + 1) % waypoints.length;
+            }
+            // Target 3 waypoints ahead for smoother cornering.
+            const lookWp = waypoints[(car.wpIdx + 3) % waypoints.length];
+            const diff = normalizeAngle(
+              Math.atan2(lookWp.y - car.y, lookWp.x - car.x) - car.heading
+            );
+            car.heading += clamp(diff, -car.turnClamp * dt, car.turnClamp * dt);
 
-          // Brake for the tightest curvature in the upcoming window, so the
-          // AI slows just enough for the corner and fires out of the apex.
-          let cornerGrip = 1;
-          for (let a = 2; a <= 12; a++) {
-            const sf = speedFactor[(car.segIdx + a) % n];
-            if (sf < cornerGrip) cornerGrip = sf;
+            // Speed: brake for the tightest upcoming corner (same as before).
+            let cornerGrip = 1;
+            for (let a = 2; a <= 12; a++) {
+              const sf = speedFactor[(car.segIdx + a) % n];
+              if (sf < cornerGrip) cornerGrip = sf;
+            }
+            const target =
+              car.maxSpeed *
+              aiBoost *
+              Math.max(0.6, cornerGrip) *
+              (1 - Math.min(0.25, Math.abs(diff) * 0.7));
+            car.speed =
+              car.speed < target
+                ? Math.min(target, car.speed + car.accel * aiBoost * dt)
+                : Math.max(target, car.speed - 0.12 * dt);
+          } else {
+            // Classic racingLine look-ahead for all other tracks.
+            const lookIdx = (car.segIdx + 5) % n;
+            const lp = racingLine[lookIdx];
+            const lq = racingLine[(lookIdx + 1) % n];
+            const tangent = Math.atan2(lq.y - lp.y, lq.x - lp.x);
+            const tx = lp.x + Math.cos(tangent + Math.PI / 2) * car.lineOffset;
+            const ty = lp.y + Math.sin(tangent + Math.PI / 2) * car.lineOffset;
+            const diff = normalizeAngle(Math.atan2(ty - car.y, tx - car.x) - car.heading);
+            car.heading += clamp(diff, -car.turnClamp * dt, car.turnClamp * dt);
+
+            // Brake for the tightest curvature in the upcoming window, so the
+            // AI slows just enough for the corner and fires out of the apex.
+            let cornerGrip = 1;
+            for (let a = 2; a <= 12; a++) {
+              const sf = speedFactor[(car.segIdx + a) % n];
+              if (sf < cornerGrip) cornerGrip = sf;
+            }
+            const target =
+              car.maxSpeed *
+              aiBoost *
+              Math.max(0.6, cornerGrip) *
+              (1 - Math.min(0.25, Math.abs(diff) * 0.7));
+            car.speed =
+              car.speed < target
+                ? Math.min(target, car.speed + car.accel * aiBoost * dt)
+                : Math.max(target, car.speed - 0.12 * dt);
           }
-          const target =
-            car.maxSpeed *
-            aiBoost *
-            Math.max(0.6, cornerGrip) *
-            (1 - Math.min(0.25, Math.abs(diff) * 0.7));
-          car.speed =
-            car.speed < target
-              ? Math.min(target, car.speed + car.accel * aiBoost * dt)
-              : Math.max(target, car.speed - 0.12 * dt);
         }
 
         car.x += Math.cos(car.heading) * car.speed * dt;
@@ -834,16 +906,35 @@ function ChampionshipCalendar({ unlocked, results, onPick, onExit, onReset }) {
                 {!isUnlocked && <Lock className="h-3.5 w-3.5 text-zinc-600" />}
               </div>
 
-              <img
-                src={TRACK_SVGS[track.id]}
-                alt=""
-                aria-hidden="true"
-                className={`w-full rounded-lg object-contain transition duration-300 ${
-                  isUnlocked
-                    ? 'opacity-90 group-hover:opacity-100 group-hover:brightness-110'
-                    : 'opacity-40 grayscale'
-                }`}
-              />
+              {track.id === 'australia' ? (
+                <svg
+                  viewBox="-6 -6 237 267"
+                  className={`w-full h-32 rounded-lg object-contain transition duration-300 ${
+                    isUnlocked
+                      ? 'opacity-90 group-hover:opacity-100 group-hover:brightness-110'
+                      : 'opacity-40 grayscale'
+                  }`}
+                  fill="none"
+                >
+                  <path
+                    d="M 209 235 C 207 225, 205 214, 202 203 L 198 190 C 195 180, 188 174, 179 168 L 165 158 C 159 154, 153 157, 147 155 C 133 150, 121 139, 115 128 C 109 117, 109 105, 112 92 L 116 76 C 118 68, 125 64, 127 57 C 130 48, 127 35, 124 27 C 121 19, 115 14, 107 12 C 99 9, 91 12, 82 5 C 78 2, 75 2, 71 5 C 64 10, 54 13, 45 17 C 38 20, 32 24, 29 29 L 30 61 C 23 62, 14 63, 10 66 C 15 80, 25 95, 36 106 L 55 124 C 62 131, 63 138, 58 149 C 57 153, 60 157, 64 161 L 130 226 C 136 232, 141 233, 146 229 L 154 219 C 157 215, 159 215, 162 220 L 174 242 C 177 247, 180 248, 186 246 L 209 238 Z"
+                    stroke="#FACC15"
+                    strokeWidth="3"
+                    fill="rgba(250,204,21,0.08)"
+                  />
+                </svg>
+              ) : (
+                <img
+                  src={TRACK_SVGS[track.id]}
+                  alt=""
+                  aria-hidden="true"
+                  className={`w-full rounded-lg object-contain transition duration-300 ${
+                    isUnlocked
+                      ? 'opacity-90 group-hover:opacity-100 group-hover:brightness-110'
+                      : 'opacity-40 grayscale'
+                  }`}
+                />
+              )}
 
               <div>
                 <h4

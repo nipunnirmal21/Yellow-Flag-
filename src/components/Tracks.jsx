@@ -22,6 +22,20 @@ function TrackOutline({ track }) {
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_50%,rgba(250,204,21,0.12),transparent_68%)]" />
 
+      {track.layoutPath && (
+        <svg
+          viewBox={track.viewBox || '-6 -6 237 267'}
+          className="absolute inset-0 m-auto h-[72%] w-[82%] opacity-75"
+          style={{
+            filter: `${shouldInvert ? 'invert(1) ' : ''}drop-shadow(0 0 10px rgba(250,204,21,0.4)) drop-shadow(0 0 24px rgba(250,204,21,0.16))`,
+          }}
+          fill="none"
+          aria-hidden="true"
+        >
+          <path d={track.layoutPath} stroke="#FACC15" strokeWidth="3" fill="rgba(250,204,21,0.08)" />
+        </svg>
+      )}
+
       {track.layoutUrl && !failed && (
         <motion.img
           src={track.layoutUrl}
@@ -81,7 +95,19 @@ function TrackModal({ track, onClose }) {
         </button>
 
         {/* Track layout */}
-        {track.layoutUrl && (
+        {track.layoutPath ? (
+          <div className="flex items-center justify-center pb-2 pt-4">
+            <svg
+              viewBox={track.viewBox || "-6 -6 237 267"}
+              className={`h-44 w-full max-w-md drop-shadow-[0_0_18px_rgba(250,204,21,0.25)] md:h-52 ${
+                shouldInvert ? 'invert brightness-200' : 'brightness-200'
+              }`}
+              fill="none"
+            >
+              <path d={track.layoutPath} stroke="#FACC15" strokeWidth="3" fill="rgba(250,204,21,0.08)" />
+            </svg>
+          </div>
+        ) : track.layoutUrl ? (
           <div className="flex items-center justify-center pb-2 pt-4">
             <img
               src={track.layoutUrl}
@@ -93,7 +119,7 @@ function TrackModal({ track, onClose }) {
               }`}
             />
           </div>
-        )}
+        ) : null}
 
         {/* Header */}
         <div className="mt-4 text-center">
@@ -109,13 +135,15 @@ function TrackModal({ track, onClose }) {
         <p className="mt-6 text-sm leading-7 text-gray-300 md:text-base">{track.description}</p>
 
         {/* Stats grid */}
-        <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-3">
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
           <TrackStat label="Country" value={track.country} />
           <TrackStat label="Track Length" value={track.trackLength} />
           <TrackStat label="Laps" value={track.laps} />
+          <TrackStat label="Corners" value={track.corners} />
           <TrackStat label="Race Distance" value={track.raceDistance} />
           <TrackStat label="Track Type" value={track.trackType} />
           <TrackStat label="Time of Day" value={track.timeOfDay} />
+          <TrackStat label="Lap Record" value={track.lapRecord} />
         </div>
       </motion.div>
     </motion.div>
