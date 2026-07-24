@@ -43,7 +43,7 @@ export const f1Tracks2026 = [
 
   {
     id: 3,
-    name: 'Suzuka Circuit',
+    name: 'Suzuka International Racing Course',
     country: 'Japan',
     layoutUrl: `${OUTLINE}/suzuka-2.svg`,
     trackLength: '5.807 km',
