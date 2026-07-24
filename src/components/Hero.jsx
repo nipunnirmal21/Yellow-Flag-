@@ -5,29 +5,63 @@ import { BRAND } from '../data/content';
 import GlowButton from './ui/GlowButton';
 
 /**
- * Full-bleed background video. Sits behind the centered hero content. If
- * public/hero-bg.mp4 fails to load, this removes itself and the gradient
+ * Full-bleed background image. Sits behind the centered hero content. If
+ * public/hero-bg.png fails to load, this removes itself and the gradient
  * background shows instead.
+ *
+ * This is the LCP element, so it loads eagerly at high priority — never lazy.
  */
-function HeroVideo() {
+function HeroBackdrop() {
   const [available, setAvailable] = useState(true);
   if (!available) return null;
 
   return (
-    <div className="absolute inset-0" aria-hidden="true">
-      <video
-        className="h-full w-full object-cover"
-        src="/hero-bg.mp4"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
+    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+      {/*
+        Shifting the photo down (below) leaves a strip with no image behind the
+        fixed navbar. Fill it with a heavily blurred copy of the photo's top
+        edge, so the nav sits on soft stadium colour rather than a flat black
+        band. Painted beneath the sharp photo, so only the strip ever shows.
+        Same src, so it costs no extra request.
+      */}
+      <div className="absolute inset-x-0 top-0 h-32 overflow-hidden">
+        <img
+          src="/hero-bg.png"
+          alt=""
+          aria-hidden="true"
+          className="h-64 w-full scale-125 object-cover object-top blur-3xl"
+        />
+      </div>
+
+      {/*
+        The hosts' heads sit ~9% from the top of the source image, and at 16:9
+        object-cover crops nothing vertically — so the photo is nudged down to
+        clear the navbar. Its top edge is feathered so the sharp image melts
+        into the blurred fill instead of meeting it at a hard line.
+      */}
+      <img
+        className="h-full w-full translate-y-12 object-cover object-center [mask-image:linear-gradient(to_bottom,transparent_0px,#000_30px)] md:translate-y-16"
+        src="/hero-bg.png"
+        alt=""
+        loading="eager"
+        fetchPriority="high"
+        decoding="async"
         onError={() => setAvailable(false)}
       />
-      {/* Dark washes keep the centered headline readable over motion. */}
-      <div className="absolute inset-0 bg-black/60" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/70" />
+      {/*
+        Dark washes keep the centered headline readable over the image.
+        The vertical stops stay near-black only in the last few percent — just
+        enough to blend into the black section below — then lift quickly so the
+        hosts' suits don't get crushed at the bottom of the frame.
+      */}
+      <div className="absolute inset-0 bg-black/25" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.40)_16%,rgba(0,0,0,0.20)_55%,rgba(0,0,0,0.38)_100%)]" />
+      {/*
+        Centre scrim: darkens only the column the copy sits in, so the headline
+        keeps its contrast while the hosts at either edge stay bright. Fades to
+        fully transparent before it reaches them.
+      */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_35%_44%_at_50%_55%,rgba(0,0,0,0.68)_0%,rgba(0,0,0,0.665)_25%,rgba(0,0,0,0.635)_45%,rgba(0,0,0,0.59)_60%,rgba(0,0,0,0.52)_72%,rgba(0,0,0,0.40)_82%,rgba(0,0,0,0.26)_90%,rgba(0,0,0,0.12)_96%,rgba(0,0,0,0)_100%)]" />
     </div>
   );
 }
@@ -35,7 +69,7 @@ function HeroVideo() {
 export default function Hero() {
   return (
     <section id="home" className="relative flex min-h-screen items-center overflow-hidden pt-28">
-      <HeroVideo />
+      <HeroBackdrop />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(250,204,21,0.12),transparent_28%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.05),transparent_24%)]" />
 
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-5 text-center md:px-8">
